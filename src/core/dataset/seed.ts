@@ -1,11 +1,10 @@
-import type { Case } from "../domain/case";
-import { CATEGORIES } from "../domain/labels";
+import { CATEGORIES, type Category, type Split } from "../domain/labels";
 
 /**
  * The 27-case seed set: per category, the fewshot case plus the first 2 tuning
  * cases by case_id. The fewshot cases are never scored, so 18 seed cases are.
  */
-export function seedIds(cases: readonly Pick<Case, "case_id" | "split" | "gold">[]): Set<string> {
+export function seedIds(cases: readonly { case_id: string; split: Split; gold: { category: Category } }[]): Set<string> {
   const ids = new Set<string>();
   for (const category of CATEGORIES) {
     const own = cases.filter((c) => c.gold.category === category);

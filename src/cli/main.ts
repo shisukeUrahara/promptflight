@@ -1,6 +1,8 @@
 import { NoApiKeyError, type Deps } from "./deps";
 import { EXIT } from "./exit";
+import { applyReview } from "./commands/applyReview";
 import { draftCases } from "./commands/draftCases";
+import { reviewSheet } from "./commands/reviewSheet";
 import { specGrid } from "./commands/specGrid";
 import { verify } from "./commands/verify";
 
@@ -9,6 +11,8 @@ type Command = (argv: string[], deps: Deps) => Promise<number>;
 const COMMANDS: Record<string, Command> = {
   "spec-grid": specGrid,
   "draft-cases": draftCases,
+  "review-sheet": reviewSheet,
+  "apply-review": applyReview,
   verify,
 };
 
