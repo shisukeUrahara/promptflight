@@ -36,7 +36,6 @@ describe("renderMessages", () => {
       [
         'Example 1\nTicket:\nFirst one A-11111\nAnswer: {"category":"billing_refund","priority":"high","order_id":"A-11111"}',
         'Example 2\nTicket:\nSecond one\nAnswer: {"category":"other","priority":"high","order_id":null}',
-        "",
         "Ticket:\nX",
       ].join("\n\n"),
     );
