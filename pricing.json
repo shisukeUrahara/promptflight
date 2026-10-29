@@ -1,0 +1,9 @@
+{
+  "source_url": "https://developers.openai.com/api/docs/pricing",
+  "retrieved_at": "2026-10-29",
+  "note": "The page lists aliases. Dated snapshots are billed at the alias price.",
+  "models": {
+    "gpt-4.1-mini-2025-04-14": { "input_per_1m": 0.4, "output_per_1m": 1.6 },
+    "gpt-4.1-2025-04-14": { "input_per_1m": 2.0, "output_per_1m": 8.0 }
+  }
+}
