@@ -1,7 +1,7 @@
-/** A call that did not finish: 429, 5xx or timeout. `status` is the HTTP code or "timeout". */
+/** A call that did not finish. `status` is the HTTP code, "timeout", or "network" (no HTTP answer). */
 export class ProviderError extends Error {
   constructor(
-    readonly status: number | "timeout",
+    readonly status: number | "timeout" | "network",
     message = `provider error: ${status}`,
   ) {
     super(message);
@@ -10,7 +10,7 @@ export class ProviderError extends Error {
 
   /** Worth another try. Other 4xx codes will fail the same way again. */
   get retryable(): boolean {
-    return this.status === "timeout" || this.status === 429 || this.status >= 500;
+    return typeof this.status === "string" || this.status === 429 || this.status >= 500;
   }
 }
 
