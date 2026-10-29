@@ -1,0 +1,23 @@
+import { mkdirSync, writeFileSync } from "node:fs";
+import path from "node:path";
+import { parseArgs } from "node:util";
+import { buildSpecGrid } from "@/core/dataset/specGrid";
+import type { Deps } from "../deps";
+import { EXIT } from "../exit";
+
+export const DEFAULT_SEED = 20261029;
+
+export async function specGrid(argv: string[], deps: Deps): Promise<number> {
+  const { values } = parseArgs({ args: argv, options: { seed: { type: "string" } } });
+  const seed = values.seed === undefined ? DEFAULT_SEED : Number(values.seed);
+  if (!Number.isInteger(seed)) {
+    deps.err(`--seed must be an integer, got "${values.seed}"`);
+    return EXIT.USAGE;
+  }
+  const rows = buildSpecGrid(seed);
+  const file = path.join(deps.dataDir, "fixtures", "tickets", "spec_grid.jsonl");
+  mkdirSync(path.dirname(file), { recursive: true });
+  writeFileSync(file, rows.map((r) => JSON.stringify(r)).join("\n") + "\n");
+  deps.out(`wrote ${rows.length} rows to ${file}`);
+  return EXIT.OK;
+}
