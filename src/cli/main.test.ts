@@ -2,7 +2,7 @@ import { mkdtempSync, readFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { describe, expect, test } from "vitest";
-import type { Deps } from "./deps";
+import { NoApiKeyError, type Deps } from "./deps";
 import { EXIT } from "./exit";
 import { main } from "./main";
 import { SpecRow } from "@/core/dataset/specGrid";
@@ -13,7 +13,16 @@ function fakeDeps() {
   const dataDir = mkdtempSync(path.join(tmpdir(), "pf-"));
   const logs: string[] = [];
   const errs: string[] = [];
-  const deps: Deps = { dataDir, out: (l) => logs.push(l), err: (l) => errs.push(l) };
+  const deps: Deps = {
+    dataDir,
+    pricingFile: "pricing.json",
+    makeLlm: () => {
+      throw new NoApiKeyError();
+    },
+    now: () => new Date("2026-10-29T10:00:00Z"),
+    out: (l) => logs.push(l),
+    err: (l) => errs.push(l),
+  };
   return { deps, logs, errs, file: path.join(dataDir, "fixtures/tickets/spec_grid.jsonl") };
 }
 
