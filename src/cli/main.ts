@@ -2,12 +2,14 @@ import { NoApiKeyError, type Deps } from "./deps";
 import { EXIT } from "./exit";
 import { draftCases } from "./commands/draftCases";
 import { specGrid } from "./commands/specGrid";
+import { verify } from "./commands/verify";
 
 type Command = (argv: string[], deps: Deps) => Promise<number>;
 
 const COMMANDS: Record<string, Command> = {
   "spec-grid": specGrid,
   "draft-cases": draftCases,
+  verify,
 };
 
 export async function main(argv: string[], deps: Deps): Promise<number> {

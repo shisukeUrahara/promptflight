@@ -2,6 +2,7 @@ import path from "node:path";
 import { parseArgs } from "node:util";
 import pLimit from "p-limit";
 import { appendJsonl, readJsonl } from "@/core/dataset/jsonl";
+import { writeManifest } from "@/core/dataset/manifest";
 import { SpecRow } from "@/core/dataset/specGrid";
 import { estimateUsd, actualUsd, loadPricing } from "@/core/cost/pricing";
 import { DRAFTER_MAX_TOKENS, DRAFTER_MODEL, DRAFTER_TEMPERATURE, Draft, draftMessages, rejectReason } from "@/core/labeling/draft";
@@ -75,6 +76,7 @@ export async function draftCases(argv: string[], deps: Deps): Promise<number> {
     ),
   );
 
+  writeManifest(dir);
   deps.out(`drafted ${written}/${todo.length}, spent $${spent.toFixed(4)} (estimate $${estimate.toFixed(4)})`);
   for (const p of problems) deps.err(p);
   if (problems.length > 0) {

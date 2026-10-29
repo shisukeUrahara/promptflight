@@ -1,6 +1,7 @@
 import { mkdirSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { parseArgs } from "node:util";
+import { writeManifest } from "@/core/dataset/manifest";
 import { buildSpecGrid } from "@/core/dataset/specGrid";
 import type { Deps } from "../deps";
 import { EXIT } from "../exit";
@@ -18,6 +19,7 @@ export async function specGrid(argv: string[], deps: Deps): Promise<number> {
   const file = path.join(deps.dataDir, "fixtures", "tickets", "spec_grid.jsonl");
   mkdirSync(path.dirname(file), { recursive: true });
   writeFileSync(file, rows.map((r) => JSON.stringify(r)).join("\n") + "\n");
+  writeManifest(path.dirname(file));
   deps.out(`wrote ${rows.length} rows to ${file}`);
   return EXIT.OK;
 }
