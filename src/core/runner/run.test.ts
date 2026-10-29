@@ -1,4 +1,5 @@
 import { describe, expect, test } from "vitest";
+import { loadPricing } from "../cost/pricing";
 import type { Case } from "../domain/case";
 import { CacheMissError } from "../llm/errors";
 import { FakeLlm, http, ok } from "../llm/fake";
@@ -7,6 +8,7 @@ import { resolveVersion, saveVersion, type Stored } from "../prompts/version";
 import { mkdtempSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
+import { CostGateError } from "./budget";
 import { runExperiment } from "./run";
 
 const good = '{"category":"other","priority":"low","order_id":null}';
@@ -127,5 +129,46 @@ describe("runExperiment", () => {
     expect(prompt).toContain("ticket text 90");
     expect(prompt).not.toContain("ticket text 91");
     expect(prompt).not.toContain("Example 2");
+  });
+});
+
+
+describe("cost gate", () => {
+  const pricing = loadPricing("pricing.json");
+
+  test("over the limit: throws CostGateError and makes 0 calls", async () => {
+    const llm = new FakeLlm(() => ok(good));
+    await expect(
+      runExperiment({ variants: [zeroJson, zeroStrict], cases, pool: cases, llm, budget: { pricing, maxUsd: 0.0001 } }),
+    ).rejects.toBeInstanceOf(CostGateError);
+    expect(llm.calls).toHaveLength(0);
+  });
+
+  test("within the limit: runs", async () => {
+    const llm = new FakeLlm(() => ok(good));
+    await runExperiment({ variants: [zeroJson], cases, pool: cases, llm, budget: { pricing, maxUsd: 1 } });
+    expect(llm.calls).toHaveLength(10);
+  });
+
+  test("cached requests cost nothing, so a limit of 0 still passes when all are cached", async () => {
+    const llm = new FakeLlm(() => ok(good));
+    const results = await runExperiment({
+      variants: [zeroJson],
+      cases,
+      pool: cases,
+      llm,
+      budget: { pricing, maxUsd: 0, isCached: () => true },
+    });
+    expect(results).toHaveLength(10);
+  });
+
+  test("only the uncached half counts toward the limit", async () => {
+    let n = 0;
+    const everySecondCached = () => n++ % 2 === 0;
+    const llm = new FakeLlm(() => ok(good));
+    await expect(
+      runExperiment({ variants: [zeroJson], cases, pool: cases, llm, budget: { pricing, maxUsd: 0, isCached: everySecondCached } }),
+    ).rejects.toBeInstanceOf(CostGateError);
+    expect(llm.calls).toHaveLength(0);
   });
 });

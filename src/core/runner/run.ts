@@ -1,11 +1,12 @@
 import pLimit from "p-limit";
 import type { Case } from "../domain/case";
 import { CacheMissError, ProviderError } from "../llm/errors";
-import type { LlmClient } from "../llm/port";
+import type { LlmClient, LlmRequest } from "../llm/port";
 import { buildRequest } from "../llm/strict";
 import { renderMessages } from "../prompts/render";
 import type { Stored } from "../prompts/version";
 import { validateResponse } from "../validate/validate";
+import { checkBudget, type Budget } from "./budget";
 import type { CaseResult } from "./types";
 
 export const CONCURRENCY = 4;
@@ -19,6 +20,8 @@ export interface RunOptions {
   pool: readonly Case[];
   llm: LlmClient;
   concurrency?: number;
+  /** When set, the run is refused before its first call if the estimate is above the limit. */
+  budget?: Budget;
   progress?: (done: number, total: number, last: CaseResult) => void;
 }
 
@@ -29,6 +32,7 @@ export interface RunOptions {
  */
 export async function runExperiment(opts: RunOptions): Promise<CaseResult[]> {
   const units = opts.variants.flatMap((variant) => opts.cases.map((c) => ({ variant, c })));
+  if (opts.budget) checkBudget(units.map(({ variant, c }) => requestFor(opts, variant, c)), opts.budget);
   const results = new Array<CaseResult>(units.length);
   const limit = pLimit(opts.concurrency ?? CONCURRENCY);
   let done = 0;
@@ -52,14 +56,20 @@ export async function runExperiment(opts: RunOptions): Promise<CaseResult[]> {
   return results;
 }
 
-async function runOne(opts: RunOptions, variant: RunOptions["variants"][number], c: Case): Promise<CaseResult> {
+type Variant = RunOptions["variants"][number];
+
+function requestFor(opts: RunOptions, variant: Variant, c: Case): LlmRequest {
   const { version } = variant;
-  const messages = renderMessages(version, { ticket: c.text, cases: opts.pool });
+  return buildRequest(version.output_mode, renderMessages(version, { ticket: c.text, cases: opts.pool }));
+}
+
+async function runOne(opts: RunOptions, variant: Variant, c: Case): Promise<CaseResult> {
+  const { version } = variant;
   const base = { case_id: c.case_id, variant: variant.name, variant_id: version.id };
 
   let res;
   try {
-    res = await opts.llm.complete(buildRequest(version.output_mode, messages));
+    res = await opts.llm.complete(requestFor(opts, variant, c));
   } catch (e) {
     if (!(e instanceof ProviderError)) throw e;
     return { ...base, code: "provider_error", detail: String(e.status), prediction: null, raw: null, usage: null, latency_ms: null, cached: false };
