@@ -1,6 +1,9 @@
 // Records real chat.completions bodies for the OpenAiClient tests.
 // Run: pnpm tsx scripts/record-openai-fixtures.ts   (needs OPENAI_API_KEY in .env, costs < $0.01)
 import { mkdirSync, writeFileSync } from "node:fs";
+import { buildRequest } from "../src/core/llm/strict";
+import { renderMessages } from "../src/core/prompts/render";
+import { resolveVersion } from "../src/core/prompts/version";
 
 process.loadEnvFile(".env");
 
@@ -34,6 +37,12 @@ async function main() {
   mkdirSync(dir, { recursive: true });
   await record("chat_ok", { ...base, max_completion_tokens: 200 });
   await record("chat_length", { ...base, max_completion_tokens: 5 });
+
+  // Strict structured output: the real zero-strict prompt, one ticket with an order id and one without.
+  const version = resolveVersion(process.cwd(), "zero-strict");
+  const strict = (ticket: string) => buildRequest(version.output_mode, renderMessages(version, { ticket, cases: [] }));
+  await record("chat_strict_order", strict("I was charged twice for order A-48213. Please fix this today."));
+  await record("chat_strict_no_order", strict("How do I change the email address on my account?"));
 }
 
 main();
