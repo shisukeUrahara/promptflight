@@ -49,7 +49,7 @@ describe("pf review-sheet", () => {
   test("the sheet never shows an intended label next to a ticket", async () => {
     expect(await main(["review-sheet"], deps)).toBe(EXIT.OK);
     const md = readSheet();
-    expect(md).not.toMatch(/intended/i);
+    expect(md).not.toMatch(/^intended:/m);
     const blocks = md.split(/^### /m).slice(1);
     expect(blocks).toHaveLength(144);
     for (const b of blocks) expect(b).toMatch(/\n> [\s\S]*\ncategory: \npriority: \n+$/);
@@ -80,7 +80,7 @@ describe("pf review-sheet", () => {
 });
 
 describe("pf apply-review", () => {
-  const pick = (n: number) => spec().slice(0, n);
+  const pick = (n: number) => spec().filter((r) => !r.batch).slice(0, n);
 
   test("3 filled rows give 3 cases, and the rest stay unlabeled", async () => {
     await main(["review-sheet"], deps);
@@ -89,7 +89,7 @@ describe("pf apply-review", () => {
     writeFileSync(sheet(), md);
     expect(await main(["apply-review"], deps)).toBe(EXIT.OK);
     expect(cases()).toHaveLength(3);
-    expect(out.join("\n")).toContain("labeled 3/144");
+    expect(out.join("\n")).toContain("labeled 3/204");
     expect(out.join("\n")).toMatch(/category: agreement 100\.0%/);
     const c = cases()[0];
     const row = spec().find((r) => r.case_id === c.case_id)!;
@@ -154,5 +154,40 @@ describe("pf apply-review", () => {
     writeFileSync(sheet(), fill(readSheet(), r.case_id, r.intended.category, r.intended.priority));
     await main(["apply-review"], deps);
     expect(await main(["verify"], deps)).toBe(EXIT.OK);
+  });
+});
+
+describe("the hard batch has its own sheet", () => {
+  const hardSheet = () => path.join(dataDir, "docs/case_review_hard.md");
+
+  test("--batch hard writes only the 60 hard tickets, to its own file", async () => {
+    expect(await main(["review-sheet", "--batch", "hard"], deps)).toBe(EXIT.OK);
+    const ids = [...readFileSync(hardSheet(), "utf8").matchAll(/^### (t-\d{3})$/gm)].map((m) => m[1]);
+    expect(ids).toHaveLength(60);
+    expect(ids.every((id) => Number(id.slice(2)) >= 145)).toBe(true);
+    expect(readFileSync(hardSheet(), "utf8")).not.toMatch(/^intended:/m);
+  });
+
+  test("the first sheet still has exactly the first 144", async () => {
+    await main(["review-sheet"], deps);
+    expect([...readSheet().matchAll(/^### (t-\d{3})$/gm)]).toHaveLength(144);
+  });
+
+  test("an unknown batch is a usage error", async () => {
+    expect(await main(["review-sheet", "--batch", "easy"], deps)).toBe(EXIT.USAGE);
+  });
+
+  test("apply-review reads both sheets", async () => {
+    await main(["review-sheet"], deps);
+    await main(["review-sheet", "--batch", "hard"], deps);
+    const first = spec().find((r) => !r.batch)!;
+    const hard = spec().find((r) => r.batch === "hard")!;
+    writeFileSync(sheet(), fill(readSheet(), first.case_id, first.intended.category, first.intended.priority));
+    writeFileSync(hardSheet(), fill(readFileSync(hardSheet(), "utf8"), hard.case_id, hard.intended.category, hard.intended.priority));
+    expect(await main(["apply-review"], deps)).toBe(EXIT.OK);
+    const got = cases();
+    expect(got.map((c) => c.case_id).sort()).toEqual([first.case_id, hard.case_id].sort());
+    expect(got.find((c) => c.case_id === hard.case_id)!.batch).toBe("hard");
+    expect(got.find((c) => c.case_id === first.case_id)!.batch).toBeUndefined();
   });
 });

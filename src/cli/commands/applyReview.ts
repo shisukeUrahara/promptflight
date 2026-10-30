@@ -13,6 +13,7 @@ const pct = (n: number) => (n * 100).toFixed(1) + "%";
 export async function applyReview(_argv: string[], deps: Deps): Promise<number> {
   const dir = path.join(deps.dataDir, "fixtures", "tickets");
   const sheetFile = path.join(deps.dataDir, "docs", "case_review.md");
+  const hardFile = path.join(deps.dataDir, "docs", "case_review_hard.md");
   const disFile = path.join(deps.dataDir, "docs", "case_disagreements.md");
   if (!existsSync(sheetFile)) {
     deps.err("no docs/case_review.md. Run: pnpm pf review-sheet");
@@ -22,7 +23,8 @@ export async function applyReview(_argv: string[], deps: Deps): Promise<number> 
   const built = buildCases(
     readJsonl(path.join(dir, "spec_grid.jsonl"), SpecRow),
     readJsonl(path.join(dir, "drafts.jsonl"), Draft),
-    parseSheet(readFileSync(sheetFile, "utf8")),
+    // The first batch's sheet plus the hard batch's sheet, if it exists.
+    { labels: new Map([sheetFile, hardFile].filter((f) => existsSync(f)).flatMap((f) => [...parseSheet(readFileSync(f, "utf8")).labels])) },
     existsSync(disFile) ? parseFinals(readFileSync(disFile, "utf8")) : new Map(),
   );
   if (built.errors.length > 0) {
