@@ -1,16 +1,23 @@
-import { existsSync, mkdirSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import path from "node:path";
 import { parseArgs } from "node:util";
 import { DirtyTreeError, PreregistrationError, guardRun } from "@/core/artifacts/guard";
 import { NotAGitRepoError } from "@/core/artifacts/git";
-import { runId } from "@/core/artifacts/naming";
+import { RunManifest } from "@/core/artifacts/manifest";
+import { runId, runLabel } from "@/core/artifacts/naming";
+import { writeRunFolder } from "@/core/artifacts/runFolder";
+import { buildScores, formatSummary } from "@/core/artifacts/scores";
 import { loadPricing } from "@/core/cost/pricing";
-import { readJsonl, writeJsonl } from "@/core/dataset/jsonl";
+import { INFRA_FAILURES } from "@/core/domain/outcome";
+import { MAX_COMPLETION_TOKENS, MODEL_UNDER_TEST, TEMPERATURE } from "@/core/llm/strict";
+import { readJsonl } from "@/core/dataset/jsonl";
+import { sha256 } from "@/core/dataset/manifest";
 import { seedIds } from "@/core/dataset/seed";
 import { Case } from "@/core/domain/case";
 import { CachingLlm } from "@/core/llm/cache";
 import { CacheMissError } from "@/core/llm/errors";
-import type { LlmClient } from "@/core/llm/port";
+import type { LlmClient, LlmRequest } from "@/core/llm/port";
+import type { CaseResult } from "@/core/runner/types";
 import { ResilientLlm } from "@/core/llm/resilient";
 import { readFrozen } from "@/core/prompts/frozen";
 import { resolveVersion } from "@/core/prompts/version";
@@ -61,8 +68,10 @@ export async function run(argv: string[], deps: Deps): Promise<number> {
     return EXIT.USAGE;
   }
 
+  let repo;
   try {
-    guardRun(split, deps.repoState(), values["allow-dirty"] ?? false);
+    repo = deps.repoState();
+    guardRun(split, repo, values["allow-dirty"] ?? false);
   } catch (e) {
     if (e instanceof DirtyTreeError || e instanceof PreregistrationError || e instanceof NotAGitRepoError) {
       deps.err(e.message);
@@ -87,7 +96,7 @@ export async function run(argv: string[], deps: Deps): Promise<number> {
   let inner: LlmClient | null = null;
   if (!values.replay) {
     try {
-      inner = new ResilientLlm(deps.makeLlm());
+      inner = new ResilientLlm(deps.makeLlm(), { backoffMs: deps.retryBackoffMs });
     } catch (e) {
       if (!(e instanceof NoApiKeyError)) throw e;
       deps.out("no OPENAI_API_KEY: replay mode (answers come from the cache only)");
@@ -95,18 +104,24 @@ export async function run(argv: string[], deps: Deps): Promise<number> {
   }
   const llm = new CachingLlm(inner, { dir: path.join(deps.dataDir, "cache", "responses"), now: deps.now });
 
-  let results;
+  const pricing = loadPricing(deps.pricingFile);
+  const runOpts = {
+    variants,
+    cases,
+    pool: all,
+    llm,
+    budget: inner ? { pricing, maxUsd, isCached: (req: LlmRequest) => llm.isCached(req) } : undefined,
+    progress: (done: number, total: number) => {
+      if (done === total || done % 25 === 0) deps.out(`  ${done}/${total}`);
+    },
+  };
+  const isInfra = (r: CaseResult) => r.code !== null && (INFRA_FAILURES as readonly string[]).includes(r.code);
+
+  let results: CaseResult[];
   try {
-    results = await runExperiment({
-      variants,
-      cases,
-      pool: all,
-      llm,
-      budget: inner ? { pricing: loadPricing(deps.pricingFile), maxUsd, isCached: (req) => llm.isCached(req) } : undefined,
-      progress: (done, total) => {
-        if (done === total || done % 25 === 0) deps.out(`  ${done}/${total}`);
-      },
-    });
+    results = await runExperiment(runOpts);
+    // Answers that worked are cached, so a second pass only repeats the calls that failed.
+    if (split === "holdout" && results.some(isInfra)) results = await runExperiment(runOpts);
   } catch (e) {
     if (e instanceof CostGateError) {
       deps.err(e.message);
@@ -119,18 +134,42 @@ export async function run(argv: string[], deps: Deps): Promise<number> {
     throw e;
   }
 
-  const id = uniqueRunId(path.join(deps.dataDir, "experiments"), runId(deps.now(), split));
-  const dir = path.join(deps.dataDir, "experiments", id);
-  mkdirSync(dir, { recursive: true });
-  writeJsonl(path.join(dir, "per_case_results.jsonl"), results);
-
-  deps.out(`run ${id}: ${cases.length} cases x ${variants.length} variants, cache hits ${llm.stats.hits}, misses ${llm.stats.misses}`);
-  for (const v of variants) {
-    const mine = results.filter((r) => r.variant === v.name);
-    const counts = new Map<string, number>();
-    mine.forEach((r) => counts.set(r.code ?? "ok", (counts.get(r.code ?? "ok") ?? 0) + 1));
-    deps.out(`  ${v.name}: ${[...counts].map(([k, n]) => `${n} ${k}`).join(", ")}`);
+  const failed = results.filter(isInfra);
+  if (split === "holdout" && failed.length > 0) {
+    deps.err(`${failed.length} calls still failed after one more try. A holdout run must have none, so no scores were written:`);
+    failed.slice(0, 10).forEach((r) => deps.err(`  ${r.variant} ${r.case_id}: ${r.code} ${r.detail ?? ""}`));
+    return EXIT.INFRA_FAILURES;
   }
+
+  const created = deps.now();
+  const id = uniqueRunId(path.join(deps.dataDir, "experiments"), runId(created, split));
+  const casesFile = path.join(deps.dataDir, "fixtures", "tickets", "cases.jsonl");
+  const scores = buildScores({ results, cases: all, pricing, model: MODEL_UNDER_TEST, split });
+  const manifest = RunManifest.parse({
+    run_id: id,
+    label: runLabel({ split, variantCount: variants.length, createdAt: created }),
+    created_at_utc: created.toISOString(),
+    split,
+    sample_count: cases.length,
+    model: MODEL_UNDER_TEST,
+    variants: Object.fromEntries(variants.map((v) => [v.name, v.version.id])),
+    temperature: TEMPERATURE,
+    max_completion_tokens: MAX_COMPLETION_TOKENS,
+    dataset_sha256: sha256(readFileSync(casesFile)),
+    pricing_retrieved_at: pricing.retrieved_at,
+    preregistration_sha: repo.preregistration_sha,
+    git_sha: repo.git_sha,
+    git_dirty: repo.git_dirty,
+    allow_dirty: values["allow-dirty"] ?? false,
+    replay: inner === null,
+    cache_hits: llm.stats.hits,
+    cache_misses: llm.stats.misses,
+    infra_failures: failed.length,
+  });
+  writeRunFolder(path.join(deps.dataDir, "experiments", id), { manifest, results, scores });
+
+  deps.out(`run ${id}: ${cases.length} cases x ${variants.length} variants, cache hits ${llm.stats.hits}, misses ${llm.stats.misses}, infrastructure failures ${failed.length}`);
+  formatSummary(scores).forEach((line) => deps.out(line));
   return EXIT.OK;
 }
 

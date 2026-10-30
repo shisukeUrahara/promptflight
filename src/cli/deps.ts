@@ -10,6 +10,8 @@ export interface Deps {
   /** Builds the live client. Throws NoApiKeyError when there is no key. */
   makeLlm(): LlmClient;
   now(): Date;
+  /** Wait before each retry of a failed call. Tests shorten it. Default 1 s then 4 s. */
+  retryBackoffMs?: number[];
   /** Git state of the code checkout (not of dataDir). Throws NotAGitRepoError outside one. */
   repoState(): RepoState;
   out(line: string): void;

@@ -3,10 +3,12 @@ import { tmpdir } from "node:os";
 import path from "node:path";
 import { beforeEach, describe, expect, test } from "vitest";
 import { NotAGitRepoError } from "@/core/artifacts/git";
+import { RunManifest } from "@/core/artifacts/manifest";
+import { sha256 } from "@/core/dataset/manifest";
 import { writeJsonl } from "@/core/dataset/jsonl";
 import type { Case } from "@/core/domain/case";
 import { CATEGORIES } from "@/core/domain/labels";
-import { FakeLlm, ok } from "@/core/llm/fake";
+import { FakeLlm, http, ok } from "@/core/llm/fake";
 import { writeFrozen } from "@/core/prompts/frozen";
 import { saveVersion } from "@/core/prompts/version";
 import { NoApiKeyError, type Deps } from "../deps";
@@ -200,5 +202,108 @@ describe("pf run guard", () => {
     };
     expect(await main(["run"], deps)).toBe(EXIT.DIRTY_TREE);
     expect(errs.join()).toContain("git checkout");
+  });
+});
+
+describe("pf run folder", () => {
+  const folder = (id: string, name: string) => path.join(dataDir, "experiments", id, name);
+
+  test("writes manifest, results, scores, csv and checksums", async () => {
+    await main(["run"], deps);
+    const id = runs()[0];
+    expect(readdirSync(path.join(dataDir, "experiments", id)).sort()).toEqual(["checksums.txt", "per_case_results.jsonl", "run_manifest.json", "scores.csv", "scores.json"]);
+    const manifest = RunManifest.parse(JSON.parse(readFileSync(folder(id, "run_manifest.json"), "utf8")));
+    expect(manifest).toMatchObject({
+      run_id: id,
+      label: "Tuning set · 4 variants · 31 Oct 2026 10:15 UTC",
+      split: "tuning",
+      sample_count: 6,
+      model: "gpt-4.1-mini-2025-04-14",
+      git_dirty: false,
+      replay: false,
+      cache_misses: 24,
+      infra_failures: 0,
+    });
+    expect(Object.keys(manifest.variants)).toEqual(["zero-json", "zero-strict", "few-json", "few-strict"]);
+    expect(manifest.dataset_sha256).toBe(sha256(readFileSync(path.join(dataDir, "fixtures/tickets/cases.jsonl"))));
+  });
+
+  test("checksums.txt matches the files (sha256sum -c format)", async () => {
+    await main(["run"], deps);
+    const id = runs()[0];
+    const lines = readFileSync(folder(id, "checksums.txt"), "utf8").trim().split("\n");
+    expect(lines).toHaveLength(4);
+    for (const line of lines) {
+      const [hash, name] = line.split("  ");
+      expect(sha256(readFileSync(folder(id, name)))).toBe(hash);
+    }
+  });
+
+  test("scores.json has no run id or timestamp, and a replay reproduces it byte for byte", async () => {
+    await main(["run"], deps);
+    now = new Date("2027-01-01T00:00:00Z");
+    await main(["run", "--replay"], deps);
+    const [first, second] = runs();
+    const a = readFileSync(folder(first, "scores.json"), "utf8");
+    expect(a).not.toMatch(/run_id|created_at|\d{4}-\d\d-\d\dT|\d{8}T\d{6}Z/);
+    expect(readFileSync(folder(second, "scores.json"), "utf8")).toBe(a);
+    expect(readFileSync(folder(second, "scores.csv"), "utf8")).toBe(readFileSync(folder(first, "scores.csv"), "utf8"));
+    expect(JSON.parse(readFileSync(folder(second, "run_manifest.json"), "utf8")).replay).toBe(true);
+  });
+
+  test("all four pre-registered contrasts appear, Holm is never below the raw p", async () => {
+    await main(["run"], deps);
+    const scores = JSON.parse(readFileSync(folder(runs()[0], "scores.json"), "utf8"));
+    expect(scores.contrasts.map((c: { id: string }) => c.id)).toEqual(["H1", "H2", "H3", "H4"]);
+    for (const c of scores.contrasts) {
+      expect(c.n_pairs).toBe(6);
+      expect(c.counts.both_right + c.counts.both_wrong + c.counts.a_only + c.counts.b_only).toBe(6);
+      expect(c.p_holm).toBeGreaterThanOrEqual(c.p);
+    }
+  });
+
+  test("only the contrasts whose two variants ran are reported", async () => {
+    await main(["run", "--variants", "zero-json,few-json"], deps);
+    const scores = JSON.parse(readFileSync(folder(runs()[0], "scores.json"), "utf8"));
+    expect(scores.contrasts.map((c: { id: string }) => c.id)).toEqual(["H1"]);
+  });
+
+  test("prints a summary table with a row per variant", async () => {
+    await main(["run"], deps);
+    const text = out.join("\n");
+    expect(text).toContain("accuracy [95% CI]");
+    for (const name of ["zero-json", "zero-strict", "few-json", "few-strict"]) expect(text).toContain(name);
+    expect(text).toContain("H1 few-json vs zero-json");
+  });
+});
+
+describe("holdout and infrastructure failures", () => {
+  test("a call that keeps failing: holdout exits 3 and writes nothing", async () => {
+    deps.retryBackoffMs = [0, 0];
+    llm = new FakeLlm((req) => (req.messages[1].content.includes("ticket 22") ? http(503) : ok(answer)));
+    expect(await main(["run", "--split", "holdout", "--variants", "zero-json"], deps)).toBe(EXIT.INFRA_FAILURES);
+    expect(runs()).toEqual([]);
+    expect(errs.join("\n")).toContain("zero-json t-022: provider_error 503");
+  });
+
+  test("a failure that clears on the second pass is retried once and the run succeeds", async () => {
+    deps.retryBackoffMs = [0, 0];
+    let failures = 0;
+    // 3 failed attempts use up the first pass's retries; the second pass gets through.
+    llm = new FakeLlm((req) => (req.messages[1].content.includes("ticket 22") && failures++ < 3 ? http(503) : ok(answer)));
+    expect(await main(["run", "--split", "holdout", "--variants", "zero-json"], deps)).toBe(EXIT.OK);
+    const manifest = JSON.parse(readFileSync(path.join(dataDir, "experiments", runs()[0], "run_manifest.json"), "utf8"));
+    expect(manifest.infra_failures).toBe(0);
+    expect(rows(runs()[0])).toHaveLength(3);
+  });
+
+  test("tuning tolerates a failed call: it is left out of the scores and counted in the manifest", async () => {
+    deps.retryBackoffMs = [0, 0];
+    llm = new FakeLlm((req) => (req.messages[1].content.includes("ticket 11") ? http(503) : ok(answer)));
+    expect(await main(["run", "--variants", "zero-json"], deps)).toBe(EXIT.OK);
+    const id = runs()[0];
+    expect(JSON.parse(readFileSync(path.join(dataDir, "experiments", id, "run_manifest.json"), "utf8")).infra_failures).toBe(1);
+    const scores = JSON.parse(readFileSync(path.join(dataDir, "experiments", id, "scores.json"), "utf8"));
+    expect(scores.variants[0]).toMatchObject({ n_total: 6, n_scored: 5, n_infra: 1 });
   });
 });
