@@ -1,4 +1,4 @@
-import { existsSync, mkdtempSync, readFileSync, readdirSync } from "node:fs";
+import { existsSync, mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { beforeEach, describe, expect, test } from "vitest";
@@ -368,5 +368,41 @@ describe("choosing the model", () => {
     expect(await main(["run", "--model", "gpt-9-imaginary"], deps)).toBe(EXIT.USAGE);
     expect(errs.join()).toContain('no price for model "gpt-9-imaginary"');
     expect(llm.calls).toHaveLength(0);
+  });
+});
+
+describe("pf check-replay", () => {
+  test("a fresh run replays identically", async () => {
+    await main(["run"], deps);
+    const calls = llm.calls.length;
+    expect(await main(["check-replay"], deps)).toBe(EXIT.OK);
+    expect(out.join("\n")).toContain("24 answers replayed, scores.json identical");
+    expect(llm.calls).toHaveLength(calls); // never calls the API
+  });
+
+  test("an edited answer in the committed results fails with exit 1", async () => {
+    await main(["run"], deps);
+    const file = path.join(dataDir, "experiments", runs()[0], "per_case_results.jsonl");
+    writeFileSync(file, readFileSync(file, "utf8").replace('"priority":"low"', '"priority":"high"'));
+    expect(await main(["check-replay"], deps)).toBe(EXIT.GATE_FAILED);
+    expect(errs.join()).toContain("answer differs");
+  });
+
+  test("a missing cache exits 2", async () => {
+    await main(["run"], deps);
+    rmSync(path.join(dataDir, "cache"), { recursive: true });
+    expect(await main(["check-replay"], deps)).toBe(EXIT.CACHE_MISS);
+  });
+
+  test("an old scores.json is reported but does not fail", async () => {
+    await main(["run"], deps);
+    const file = path.join(dataDir, "experiments", runs()[0], "scores.json");
+    writeFileSync(file, "{}\n");
+    expect(await main(["check-replay"], deps)).toBe(EXIT.OK);
+    expect(out.join("\n")).toContain("older scoring code");
+  });
+
+  test("an unknown run id is a usage error", async () => {
+    expect(await main(["check-replay", "--run", "nope"], deps)).toBe(EXIT.USAGE);
   });
 });

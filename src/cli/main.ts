@@ -1,6 +1,7 @@
 import { NoApiKeyError, type Deps } from "./deps";
 import { EXIT } from "./exit";
 import { applyReview } from "./commands/applyReview";
+import { checkReplay } from "./commands/checkReplay";
 import { draftCases } from "./commands/draftCases";
 import { gate } from "./commands/gate";
 import { power } from "./commands/power";
@@ -17,6 +18,7 @@ const COMMANDS: Record<string, Command> = {
   "review-sheet": reviewSheet,
   "apply-review": applyReview,
   gate,
+  "check-replay": checkReplay,
   power,
   run,
   verify,

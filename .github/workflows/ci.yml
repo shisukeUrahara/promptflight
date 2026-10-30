@@ -19,6 +19,10 @@ jobs:
       - run: pnpm typecheck
       - run: pnpm test
       - run: pnpm pf verify
+      - name: Every committed run replays from the cache with no API key
+        run: pnpm pf check-replay
+      - name: The newest few-strict prompt is not significantly worse than the frozen one
+        run: pnpm pf gate --baseline "$(node -p "require('./prompts/frozen.json')['few-strict']")" --candidate few-strict --split tuning
       - run: pnpm build
 
   e2e:
