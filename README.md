@@ -48,3 +48,35 @@ pnpm dev            # http://localhost:3000
 | `PF_READONLY` | empty | `1` turns off saving prompts from the browser (the server action refuses). |
 
 Copy `.env.example` to `.env` to set them. `.env` is git-ignored and never copied into the Docker image.
+
+## Command line
+
+Every experiment runs from the CLI (`pnpm pf <command>`). The web app only reads results and saves prompt versions.
+
+| Command | What it does |
+|---|---|
+| `pf spec-grid` | Writes the seeded grid of 204 intended labels (`fixtures/tickets/spec_grid.jsonl`). |
+| `pf draft-cases --max-usd 1` | Asks gpt-4.1 to write one ticket per row that has none yet. Refuses before any call if the estimate is above the limit. |
+| `pf review-sheet [--batch hard]` | Writes the blind labeling sheet: ticket text and empty fields, no intended label. |
+| `pf apply-review` | Reads the filled sheets, writes `cases.jsonl`, reports agreement and Cohen's kappa. |
+| `pf verify` | Checks the dataset and prompt files against their hashes. |
+| `pf run --split tuning\|holdout [--variants a,b] [--model m] [--replay]` | Runs every variant on every ticket of a split and writes a run folder. A holdout run needs a clean tree and a committed `docs/preregistration.md`. |
+| `pf check-replay` | Re-runs every committed run from the cache, with no key, and fails if any answer differs. |
+| `pf gate --baseline <id> --candidate <name>` | Fails if the candidate prompt is significantly worse than the baseline on the same tickets (exact McNemar). |
+| `pf power --n 138` | The smallest accuracy difference N paired tickets can detect, by seeded simulation. |
+
+Exit codes: 0 ok, 1 check failed, 2 cache miss in replay mode, 3 calls still failing, 4 over the cost limit, 5 dirty tree or missing pre-registration, 64 usage error.
+
+A run folder (`experiments/<run_id>/`) holds `run_manifest.json` (model, prompt versions, dataset hash, git SHA, pre-registration SHA, cache hits), `per_case_results.jsonl` (every raw answer), `scores.json`, `scores.csv` and `checksums.txt`.
+
+## Tests
+
+```bash
+pnpm test        # unit and component tests (Vitest; node for src/core, jsdom for components)
+pnpm e2e         # browser tests (Playwright) at 390, 768 and 1440 px, axe in light and dark
+pnpm lint && pnpm typecheck
+```
+
+The browser tests run against `e2e/fixtures/data/`, a small synthetic data folder made by a scripted fake model (`scripts/make-e2e-fixture.ts`), so they never depend on real results. CI runs all of the above plus `pf verify`, `pf check-replay` and `pf gate` on every push.
+
+How the code fits together: [docs/CODE_TOUR.md](docs/CODE_TOUR.md). Design decisions: [docs/adr/](docs/adr/).
