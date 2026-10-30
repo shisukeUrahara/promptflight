@@ -80,3 +80,47 @@ pnpm lint && pnpm typecheck
 The browser tests run against `e2e/fixtures/data/`, a small synthetic data folder made by a scripted fake model (`scripts/make-e2e-fixture.ts`), so they never depend on real results. CI runs all of the above plus `pf verify`, `pf check-replay` and `pf gate` on every push.
 
 How the code fits together: [docs/CODE_TOUR.md](docs/CODE_TOUR.md). Design decisions: [docs/adr/](docs/adr/).
+
+## Results
+
+Holdout: 138 tickets (90 from the first batch, 48 from a harder batch), labeled blind by one person. One run per model, from a clean tree, after the pre-registration ([docs/preregistration.md](docs/preregistration.md)) was committed. Full write-up: [docs/analysis.md](docs/analysis.md).
+
+**Category accuracy (primary), with 95% bootstrap intervals**
+
+| Model | zero-json | zero-strict | few-json | few-strict |
+|---|---|---|---|---|
+| gpt-4.1-mini-2025-04-14 | 0.855 [0.790, 0.913] | 0.848 [0.783, 0.906] | 0.862 [0.804, 0.913] | 0.870 [0.812, 0.920] |
+| gpt-4o-mini-2024-07-18 | 0.855 [0.797, 0.913] | 0.841 [0.775, 0.899] | 0.906 [0.855, 0.949] | 0.884 [0.826, 0.935] |
+
+- **No pre-registered difference is shown** after Holm correction, on either model, for category or priority. This was expected: the power statement written before the run said 138 tickets could not detect a category difference at the disagreement rate seen on tuning.
+- The closest calls: few-shot on gpt-4o-mini (+0.051, raw p 0.092) and strict output lowering priority accuracy on gpt-4.1-mini (−0.058, raw p 0.021, Holm 0.086).
+- **Every answer was valid**: no bad JSON, wrong shape or out-of-list label for any variant, because the prompt lists the labels. A bare prompt that does not list them answered `"Billing"` (a recorded response in `src/core/llm/__fixtures__/`).
+- **Prompt injection is the biggest effect**: an instruction hidden in the ticket was obeyed on 5 to 11 of 20 tickets, whatever the variant.
+- Few-shot costs about three times the prompt tokens (1,167 vs 394 per ticket on gpt-4.1-mini).
+- Seven of the eight tickets every variant gets wrong on both models are `product_bug` by the labeling guide's rule (something stopped working) but read as security or shipping stories. The models label the topic; the guide labels the cause.
+
+## Limits
+
+- One human labeler; the tickets are LLM-written; the ticket writer (gpt-4.1) and one tested model are from the same family.
+- 138 paired tickets detect only large differences (about 13 points at the assumed disagreement rate).
+- One run per model at temperature 0; repeat variance is not measured.
+- Priority labels are noisy (human vs drafter kappa 0.352), and the `other` class has 7 tickets.
+
+## Reproduce
+
+No API key needed: every answer is in `cache/responses/`.
+
+```bash
+git clone https://github.com/shisukeUrahara/promptflight.git && cd promptflight
+pnpm install --frozen-lockfile
+pnpm pf verify                                   # dataset and prompts match their hashes
+pnpm pf check-replay                             # every committed run replays answer for answer
+pnpm pf run --split holdout --replay             # rebuilds the gpt-4.1-mini holdout run from the cache
+cmp experiments/20261030T122450Z-holdout/scores.json "$(ls -d experiments/*-holdout | sort | tail -1)/scores.json"
+```
+
+The last command prints nothing: the rebuilt `scores.json` is byte-for-byte the published one.
+
+## License
+
+MIT. See [LICENSE](LICENSE).
