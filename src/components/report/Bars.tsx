@@ -47,7 +47,7 @@ export function FailureTable({ variants, runId }: { variants: VariantReport[]; r
             </th>
             {variants.map((v) => (
               <th key={v.variant} scope="col" className="py-1 text-right font-normal">
-                <VariantName name={v.variant} className="justify-end text-xs" />
+                <VariantName name={v.variant} className="justify-end whitespace-nowrap text-xs" />
               </th>
             ))}
           </tr>
