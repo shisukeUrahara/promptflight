@@ -122,10 +122,19 @@ export function formatSummary(scores: RunScores): string[] {
   const line = (cells: string[]) => cells.map((c, i) => c.padEnd(widths[i])).join("  ").trimEnd();
   const out = [line(head), line(widths.map((w) => "-".repeat(w))), ...body.map(line)];
   if (scores.contrasts.length > 0) {
-    out.push("", "contrast (b minus a)        pairs  a-only  b-only  diff [95% CI]            p     p (Holm)");
-    for (const c of scores.contrasts) {
-      out.push(`${c.id} ${c.b} vs ${c.a}`.padEnd(27) + `${String(c.n_pairs).padEnd(7)}${String(c.counts.a_only).padEnd(8)}${String(c.counts.b_only).padEnd(8)}${f(c.accuracy_diff.point)} [${f(c.accuracy_diff.lo)}, ${f(c.accuracy_diff.hi)}]  ${f(c.p)}  ${f(c.p_holm)}`);
-    }
+    const heads = ["contrast (b minus a)", "pairs", "a-only", "b-only", "diff [95% CI]", "p", "p (Holm)"];
+    const rows = scores.contrasts.map((c) => [
+      `${c.id} ${c.b} vs ${c.a}`,
+      String(c.n_pairs),
+      String(c.counts.a_only),
+      String(c.counts.b_only),
+      `${f(c.accuracy_diff.point)} [${f(c.accuracy_diff.lo)}, ${f(c.accuracy_diff.hi)}]`,
+      f(c.p),
+      f(c.p_holm),
+    ]);
+    const w = heads.map((h, i) => Math.max(h.length, ...rows.map((r) => r[i].length)));
+    const row = (cells: string[]) => cells.map((c, i) => c.padEnd(w[i])).join("  ").trimEnd();
+    out.push("", row(heads), row(w.map((n) => "-".repeat(n))), ...rows.map(row));
   }
   return out;
 }

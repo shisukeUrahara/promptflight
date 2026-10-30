@@ -274,6 +274,8 @@ describe("pf run folder", () => {
     expect(text).toContain("accuracy [95% CI]");
     for (const name of ["zero-json", "zero-strict", "few-json", "few-strict"]) expect(text).toContain(name);
     expect(text).toContain("H1 few-json vs zero-json");
+    // columns are separated even when a label is the longest cell
+    expect(text).toMatch(/H3 few-strict vs zero-strict {2,}\d/);
   });
 });
 

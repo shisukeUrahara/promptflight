@@ -1,1 +1,125 @@
 @import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* PromptFlight design tokens. Neutrals and status colors follow SearchLab; the four
+   variant colors are new. Each variant has a fill (bars, dots) and an -ink tone for text. */
+:root {
+  --canvas: #f6f4ef;
+  --surface: #ffffff;
+  --surface-2: #efece5;
+  --ink: #0f1b2d;
+  --muted: #5b6779;
+  --line: #e3ded4;
+  --primary: #2f5bea;
+  --primary-ink: #ffffff;
+  --success: #0a7566;
+  --success-bg: #e2f4f0;
+  --warn: #8a5a00;
+  --warn-bg: #fbf0d9;
+  --danger: #c2463d;
+  --danger-bg: #f9e3e0;
+  --v-zero-json: #e0782e;
+  --v-zero-strict: #3b6ff0;
+  --v-few-json: #11a38b;
+  --v-few-strict: #9b5de5;
+  --v-zero-json-ink: #a14a12;
+  --v-zero-strict-ink: #2649c9;
+  --v-few-json-ink: #0a7566;
+  --v-few-strict-ink: #7a3fc2;
+  --shadow: 0 1px 2px rgb(15 27 45 / 0.04), 0 4px 16px rgb(15 27 45 / 0.04);
+  color-scheme: light;
+}
+
+.dark {
+  --canvas: #0a0f1a;
+  --surface: #111827;
+  --surface-2: #172033;
+  --ink: #e6ebf5;
+  --muted: #93a0b4;
+  --line: #233047;
+  --primary: #6c8cff;
+  --primary-ink: #0a0f1a;
+  --success: #2cc7ae;
+  --success-bg: #0f2e2c;
+  --warn: #e3b14f;
+  --warn-bg: #2e2412;
+  --danger: #f07167;
+  --danger-bg: #331a1a;
+  --v-zero-json: #f0924a;
+  --v-zero-strict: #6c8cff;
+  --v-few-json: #2cc7ae;
+  --v-few-strict: #b88af0;
+  --v-zero-json-ink: #f0924a;
+  --v-zero-strict-ink: #8fa6ff;
+  --v-few-json-ink: #2cc7ae;
+  --v-few-strict-ink: #c4a0ff;
+  --shadow: 0 1px 2px rgb(0 0 0 / 0.3), 0 8px 24px rgb(0 0 0 / 0.25);
+  color-scheme: dark;
+}
+
+@theme inline {
+  --color-canvas: var(--canvas);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-ink: var(--ink);
+  --color-muted: var(--muted);
+  --color-line: var(--line);
+  --color-primary: var(--primary);
+  --color-primary-ink: var(--primary-ink);
+  --color-success: var(--success);
+  --color-success-bg: var(--success-bg);
+  --color-warn: var(--warn);
+  --color-warn-bg: var(--warn-bg);
+  --color-danger: var(--danger);
+  --color-danger-bg: var(--danger-bg);
+  --color-v-zero-json: var(--v-zero-json);
+  --color-v-zero-strict: var(--v-zero-strict);
+  --color-v-few-json: var(--v-few-json);
+  --color-v-few-strict: var(--v-few-strict);
+  --color-v-zero-json-ink: var(--v-zero-json-ink);
+  --color-v-zero-strict-ink: var(--v-zero-strict-ink);
+  --color-v-few-json-ink: var(--v-few-json-ink);
+  --color-v-few-strict-ink: var(--v-few-strict-ink);
+  --shadow-card: var(--shadow);
+  --font-sans: var(--font-inter), system-ui, sans-serif;
+  --font-display: var(--font-geist), var(--font-inter), system-ui, sans-serif;
+  --font-mono: var(--font-jetbrains), ui-monospace, monospace;
+}
+
+/* In the base layer so utility classes (e.g. focus-visible:outline-none) can override them. */
+@layer base {
+  html,
+  body {
+    background: var(--canvas);
+    color: var(--ink);
+  }
+
+  body {
+    font-family: var(--font-sans);
+    overflow-x: hidden;
+  }
+
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-display);
+    letter-spacing: -0.015em;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
+    border-radius: 6px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
