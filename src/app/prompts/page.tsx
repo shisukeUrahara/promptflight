@@ -67,6 +67,11 @@ export default async function Page(props: PageProps<"/prompts">) {
             </ul>
           </Card>
           <Card title={`${selected.name} · ${selected.id}`} hint={`${selected.output_mode} · examples: ${selected.examples}`}>
+            {(sp.saved === "1" || sp.restored === "1") && (
+              <p role="status" className="mb-3 rounded-lg bg-success-bg px-3 py-2 text-sm text-success">
+                {sp.saved === "1" ? `Saved as ${selected.id}.` : `This content already existed as ${selected.id}; it is now the newest version.`}
+              </p>
+            )}
             <Workbench key={selected.id} base={selected} readonly={readonly} />
           </Card>
           <Card title="Schema preview" hint="What json_strict sends as response_format. json_prompt asks for the same shape in the text.">

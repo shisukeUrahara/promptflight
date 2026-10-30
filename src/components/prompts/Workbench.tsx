@@ -30,7 +30,8 @@ export function Workbench({ base, readonly }: { base: Base; readonly: boolean })
     start(async () => {
       const r = await savePrompt({ name: base.name, messages, output_mode: outputMode, examples });
       setResult(r);
-      if (r.ok) router.replace(`/prompts?name=${base.name}&id=${r.id}`, { scroll: false });
+      // The page shows the new version (and remounts this editor), so the result travels in the URL.
+      if (r.ok) router.replace(`/prompts?name=${base.name}&id=${r.id}&${r.restored ? "restored" : "saved"}=1`, { scroll: false });
     });
 
   return (
@@ -84,9 +85,9 @@ export function Workbench({ base, readonly }: { base: Base; readonly: boolean })
         </button>
         {readonly && <span className="text-sm text-muted">Read-only: saving is turned off on this server.</span>}
         {!readonly && !changed && <span className="text-sm text-muted">Edit the prompt to save a new version.</span>}
-        {result && (
-          <span role={result.ok ? "status" : "alert"} className={`text-sm ${result.ok ? "text-success" : "text-danger"}`}>
-            {result.ok ? (result.restored ? `Same as ${result.id}, which is now the newest.` : `Saved as ${result.id}.`) : result.error}
+        {result && !result.ok && (
+          <span role="alert" className="text-sm text-danger">
+            {result.error}
           </span>
         )}
       </div>
