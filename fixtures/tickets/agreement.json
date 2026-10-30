@@ -1,14 +1,14 @@
 {
   "total": 204,
-  "labeled": 144,
+  "labeled": 204,
   "category": {
-    "agreement": 0.8402777777777778,
-    "kappa": 0.8203125000000001
+    "agreement": 0.8235294117647058,
+    "kappa": 0.801470588235294
   },
   "priority": {
-    "agreement": 0.5138888888888888,
-    "kappa": 0.3434935521688159
+    "agreement": 0.5196078431372549,
+    "kappa": 0.35162482973341125
   },
-  "disagreements": 88,
-  "pending_adjudication": 88
+  "disagreements": 124,
+  "pending_adjudication": 124
 }
