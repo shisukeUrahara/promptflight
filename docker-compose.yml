@@ -1,0 +1,14 @@
+services:
+  web:
+    build: .
+    # The key is read at container start, never copied into the image (.env is dockerignored).
+    # Without it the app still works: it only reads committed runs and saves prompt versions.
+    env_file:
+      - path: .env
+        required: false
+    ports: ["127.0.0.1:3000:3000"]
+    volumes:
+      - ./fixtures:/data/fixtures
+      - ./prompts:/data/prompts
+      - ./cache:/data/cache
+      - ./experiments:/data/experiments
