@@ -1,0 +1,1145 @@
+{
+  "split": "tuning",
+  "model": "gpt-4.1-mini-2025-04-14",
+  "n_cases": 17,
+  "bootstrap": {
+    "draws": 10000,
+    "seed": 20261029
+  },
+  "variants": [
+    {
+      "variant": "zero-json",
+      "variant_id": "024ed5a3",
+      "n_total": 17,
+      "n_scored": 17,
+      "n_infra": 0,
+      "accuracy": 0.9411764705882353,
+      "macro_f1": 0.9407407407407408,
+      "priority_accuracy": 0.8235294117647058,
+      "order_id_exact": 1,
+      "format_validity": 1,
+      "label_validity": 1,
+      "failures": {},
+      "confusion": {
+        "rows": [
+          "billing_refund",
+          "billing_dispute",
+          "account_access",
+          "account_security",
+          "shipping_delay",
+          "shipping_damaged",
+          "product_bug",
+          "feature_request",
+          "other"
+        ],
+        "columns": [
+          "billing_refund",
+          "billing_dispute",
+          "account_access",
+          "account_security",
+          "shipping_delay",
+          "shipping_damaged",
+          "product_bug",
+          "feature_request",
+          "other",
+          "failed"
+        ],
+        "matrix": [
+          [
+            2,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            1,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            2,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            2,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            2,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            0,
+            2,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            2,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            2,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0
+          ]
+        ]
+      },
+      "per_class": [
+        {
+          "category": "billing_refund",
+          "support": 2,
+          "tp": 2,
+          "fp": 0,
+          "fn": 0,
+          "precision": 1,
+          "recall": 1,
+          "f1": 1
+        },
+        {
+          "category": "billing_dispute",
+          "support": 2,
+          "tp": 1,
+          "fp": 0,
+          "fn": 1,
+          "precision": 1,
+          "recall": 0.5,
+          "f1": 0.6666666666666666
+        },
+        {
+          "category": "account_access",
+          "support": 2,
+          "tp": 2,
+          "fp": 0,
+          "fn": 0,
+          "precision": 1,
+          "recall": 1,
+          "f1": 1
+        },
+        {
+          "category": "account_security",
+          "support": 2,
+          "tp": 2,
+          "fp": 1,
+          "fn": 0,
+          "precision": 0.6666666666666666,
+          "recall": 1,
+          "f1": 0.8
+        },
+        {
+          "category": "shipping_delay",
+          "support": 2,
+          "tp": 2,
+          "fp": 0,
+          "fn": 0,
+          "precision": 1,
+          "recall": 1,
+          "f1": 1
+        },
+        {
+          "category": "shipping_damaged",
+          "support": 2,
+          "tp": 2,
+          "fp": 0,
+          "fn": 0,
+          "precision": 1,
+          "recall": 1,
+          "f1": 1
+        },
+        {
+          "category": "product_bug",
+          "support": 2,
+          "tp": 2,
+          "fp": 0,
+          "fn": 0,
+          "precision": 1,
+          "recall": 1,
+          "f1": 1
+        },
+        {
+          "category": "feature_request",
+          "support": 2,
+          "tp": 2,
+          "fp": 0,
+          "fn": 0,
+          "precision": 1,
+          "recall": 1,
+          "f1": 1
+        },
+        {
+          "category": "other",
+          "support": 1,
+          "tp": 1,
+          "fp": 0,
+          "fn": 0,
+          "precision": 1,
+          "recall": 1,
+          "f1": 1
+        }
+      ],
+      "injection": {
+        "n": 2,
+        "followed": 0,
+        "rate": 0
+      },
+      "tokens": {
+        "prompt_mean": 395.1764705882353,
+        "completion_mean": 22.058823529411764
+      },
+      "latency_ms": {
+        "p50": 951,
+        "p95": 2336
+      },
+      "cost_per_100_usd": 0.019336470588235295,
+      "accuracy_ci": {
+        "lo": 0.8235294117647058,
+        "hi": 1
+      },
+      "macro_f1_ci": {
+        "lo": 0.5833333333333334,
+        "hi": 1
+      }
+    },
+    {
+      "variant": "zero-strict",
+      "variant_id": "8ff38b4e",
+      "n_total": 17,
+      "n_scored": 17,
+      "n_infra": 0,
+      "accuracy": 0.9411764705882353,
+      "macro_f1": 0.9407407407407408,
+      "priority_accuracy": 0.7647058823529411,
+      "order_id_exact": 1,
+      "format_validity": 1,
+      "label_validity": 1,
+      "failures": {},
+      "confusion": {
+        "rows": [
+          "billing_refund",
+          "billing_dispute",
+          "account_access",
+          "account_security",
+          "shipping_delay",
+          "shipping_damaged",
+          "product_bug",
+          "feature_request",
+          "other"
+        ],
+        "columns": [
+          "billing_refund",
+          "billing_dispute",
+          "account_access",
+          "account_security",
+          "shipping_delay",
+          "shipping_damaged",
+          "product_bug",
+          "feature_request",
+          "other",
+          "failed"
+        ],
+        "matrix": [
+          [
+            2,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            1,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            2,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            2,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            2,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            0,
+            2,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            2,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            2,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0
+          ]
+        ]
+      },
+      "per_class": [
+        {
+          "category": "billing_refund",
+          "support": 2,
+          "tp": 2,
+          "fp": 0,
+          "fn": 0,
+          "precision": 1,
+          "recall": 1,
+          "f1": 1
+        },
+        {
+          "category": "billing_dispute",
+          "support": 2,
+          "tp": 1,
+          "fp": 0,
+          "fn": 1,
+          "precision": 1,
+          "recall": 0.5,
+          "f1": 0.6666666666666666
+        },
+        {
+          "category": "account_access",
+          "support": 2,
+          "tp": 2,
+          "fp": 0,
+          "fn": 0,
+          "precision": 1,
+          "recall": 1,
+          "f1": 1
+        },
+        {
+          "category": "account_security",
+          "support": 2,
+          "tp": 2,
+          "fp": 1,
+          "fn": 0,
+          "precision": 0.6666666666666666,
+          "recall": 1,
+          "f1": 0.8
+        },
+        {
+          "category": "shipping_delay",
+          "support": 2,
+          "tp": 2,
+          "fp": 0,
+          "fn": 0,
+          "precision": 1,
+          "recall": 1,
+          "f1": 1
+        },
+        {
+          "category": "shipping_damaged",
+          "support": 2,
+          "tp": 2,
+          "fp": 0,
+          "fn": 0,
+          "precision": 1,
+          "recall": 1,
+          "f1": 1
+        },
+        {
+          "category": "product_bug",
+          "support": 2,
+          "tp": 2,
+          "fp": 0,
+          "fn": 0,
+          "precision": 1,
+          "recall": 1,
+          "f1": 1
+        },
+        {
+          "category": "feature_request",
+          "support": 2,
+          "tp": 2,
+          "fp": 0,
+          "fn": 0,
+          "precision": 1,
+          "recall": 1,
+          "f1": 1
+        },
+        {
+          "category": "other",
+          "support": 1,
+          "tp": 1,
+          "fp": 0,
+          "fn": 0,
+          "precision": 1,
+          "recall": 1,
+          "f1": 1
+        }
+      ],
+      "injection": {
+        "n": 2,
+        "followed": 0,
+        "rate": 0
+      },
+      "tokens": {
+        "prompt_mean": 480.1764705882353,
+        "completion_mean": 17.352941176470587
+      },
+      "latency_ms": {
+        "p50": 868,
+        "p95": 1309
+      },
+      "cost_per_100_usd": 0.021983529411764707,
+      "accuracy_ci": {
+        "lo": 0.8235294117647058,
+        "hi": 1
+      },
+      "macro_f1_ci": {
+        "lo": 0.5833333333333334,
+        "hi": 1
+      }
+    },
+    {
+      "variant": "few-json",
+      "variant_id": "8bce780b",
+      "n_total": 17,
+      "n_scored": 17,
+      "n_infra": 0,
+      "accuracy": 0.9411764705882353,
+      "macro_f1": 0.9407407407407408,
+      "priority_accuracy": 0.7058823529411765,
+      "order_id_exact": 1,
+      "format_validity": 1,
+      "label_validity": 1,
+      "failures": {},
+      "confusion": {
+        "rows": [
+          "billing_refund",
+          "billing_dispute",
+          "account_access",
+          "account_security",
+          "shipping_delay",
+          "shipping_damaged",
+          "product_bug",
+          "feature_request",
+          "other"
+        ],
+        "columns": [
+          "billing_refund",
+          "billing_dispute",
+          "account_access",
+          "account_security",
+          "shipping_delay",
+          "shipping_damaged",
+          "product_bug",
+          "feature_request",
+          "other",
+          "failed"
+        ],
+        "matrix": [
+          [
+            2,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            1,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            2,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            2,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            2,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            0,
+            2,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            2,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            2,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0
+          ]
+        ]
+      },
+      "per_class": [
+        {
+          "category": "billing_refund",
+          "support": 2,
+          "tp": 2,
+          "fp": 0,
+          "fn": 0,
+          "precision": 1,
+          "recall": 1,
+          "f1": 1
+        },
+        {
+          "category": "billing_dispute",
+          "support": 2,
+          "tp": 1,
+          "fp": 0,
+          "fn": 1,
+          "precision": 1,
+          "recall": 0.5,
+          "f1": 0.6666666666666666
+        },
+        {
+          "category": "account_access",
+          "support": 2,
+          "tp": 2,
+          "fp": 0,
+          "fn": 0,
+          "precision": 1,
+          "recall": 1,
+          "f1": 1
+        },
+        {
+          "category": "account_security",
+          "support": 2,
+          "tp": 2,
+          "fp": 1,
+          "fn": 0,
+          "precision": 0.6666666666666666,
+          "recall": 1,
+          "f1": 0.8
+        },
+        {
+          "category": "shipping_delay",
+          "support": 2,
+          "tp": 2,
+          "fp": 0,
+          "fn": 0,
+          "precision": 1,
+          "recall": 1,
+          "f1": 1
+        },
+        {
+          "category": "shipping_damaged",
+          "support": 2,
+          "tp": 2,
+          "fp": 0,
+          "fn": 0,
+          "precision": 1,
+          "recall": 1,
+          "f1": 1
+        },
+        {
+          "category": "product_bug",
+          "support": 2,
+          "tp": 2,
+          "fp": 0,
+          "fn": 0,
+          "precision": 1,
+          "recall": 1,
+          "f1": 1
+        },
+        {
+          "category": "feature_request",
+          "support": 2,
+          "tp": 2,
+          "fp": 0,
+          "fn": 0,
+          "precision": 1,
+          "recall": 1,
+          "f1": 1
+        },
+        {
+          "category": "other",
+          "support": 1,
+          "tp": 1,
+          "fp": 0,
+          "fn": 0,
+          "precision": 1,
+          "recall": 1,
+          "f1": 1
+        }
+      ],
+      "injection": {
+        "n": 2,
+        "followed": 0,
+        "rate": 0
+      },
+      "tokens": {
+        "prompt_mean": 1168.1764705882354,
+        "completion_mean": 17.352941176470587
+      },
+      "latency_ms": {
+        "p50": 866,
+        "p95": 1161
+      },
+      "cost_per_100_usd": 0.04950352941176471,
+      "accuracy_ci": {
+        "lo": 0.8235294117647058,
+        "hi": 1
+      },
+      "macro_f1_ci": {
+        "lo": 0.5833333333333334,
+        "hi": 1
+      }
+    },
+    {
+      "variant": "few-strict",
+      "variant_id": "4224b7c2",
+      "n_total": 17,
+      "n_scored": 17,
+      "n_infra": 0,
+      "accuracy": 0.9411764705882353,
+      "macro_f1": 0.9407407407407408,
+      "priority_accuracy": 0.7058823529411765,
+      "order_id_exact": 1,
+      "format_validity": 1,
+      "label_validity": 1,
+      "failures": {},
+      "confusion": {
+        "rows": [
+          "billing_refund",
+          "billing_dispute",
+          "account_access",
+          "account_security",
+          "shipping_delay",
+          "shipping_damaged",
+          "product_bug",
+          "feature_request",
+          "other"
+        ],
+        "columns": [
+          "billing_refund",
+          "billing_dispute",
+          "account_access",
+          "account_security",
+          "shipping_delay",
+          "shipping_damaged",
+          "product_bug",
+          "feature_request",
+          "other",
+          "failed"
+        ],
+        "matrix": [
+          [
+            2,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            1,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            2,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            2,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            2,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            0,
+            2,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            2,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            2,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0
+          ]
+        ]
+      },
+      "per_class": [
+        {
+          "category": "billing_refund",
+          "support": 2,
+          "tp": 2,
+          "fp": 0,
+          "fn": 0,
+          "precision": 1,
+          "recall": 1,
+          "f1": 1
+        },
+        {
+          "category": "billing_dispute",
+          "support": 2,
+          "tp": 1,
+          "fp": 0,
+          "fn": 1,
+          "precision": 1,
+          "recall": 0.5,
+          "f1": 0.6666666666666666
+        },
+        {
+          "category": "account_access",
+          "support": 2,
+          "tp": 2,
+          "fp": 0,
+          "fn": 0,
+          "precision": 1,
+          "recall": 1,
+          "f1": 1
+        },
+        {
+          "category": "account_security",
+          "support": 2,
+          "tp": 2,
+          "fp": 1,
+          "fn": 0,
+          "precision": 0.6666666666666666,
+          "recall": 1,
+          "f1": 0.8
+        },
+        {
+          "category": "shipping_delay",
+          "support": 2,
+          "tp": 2,
+          "fp": 0,
+          "fn": 0,
+          "precision": 1,
+          "recall": 1,
+          "f1": 1
+        },
+        {
+          "category": "shipping_damaged",
+          "support": 2,
+          "tp": 2,
+          "fp": 0,
+          "fn": 0,
+          "precision": 1,
+          "recall": 1,
+          "f1": 1
+        },
+        {
+          "category": "product_bug",
+          "support": 2,
+          "tp": 2,
+          "fp": 0,
+          "fn": 0,
+          "precision": 1,
+          "recall": 1,
+          "f1": 1
+        },
+        {
+          "category": "feature_request",
+          "support": 2,
+          "tp": 2,
+          "fp": 0,
+          "fn": 0,
+          "precision": 1,
+          "recall": 1,
+          "f1": 1
+        },
+        {
+          "category": "other",
+          "support": 1,
+          "tp": 1,
+          "fp": 0,
+          "fn": 0,
+          "precision": 1,
+          "recall": 1,
+          "f1": 1
+        }
+      ],
+      "injection": {
+        "n": 2,
+        "followed": 0,
+        "rate": 0
+      },
+      "tokens": {
+        "prompt_mean": 1253.1764705882354,
+        "completion_mean": 17.352941176470587
+      },
+      "latency_ms": {
+        "p50": 852,
+        "p95": 1027
+      },
+      "cost_per_100_usd": 0.05290352941176472,
+      "accuracy_ci": {
+        "lo": 0.8235294117647058,
+        "hi": 1
+      },
+      "macro_f1_ci": {
+        "lo": 0.5833333333333334,
+        "hi": 1
+      }
+    }
+  ],
+  "contrasts": [
+    {
+      "id": "H1",
+      "a": "zero-json",
+      "b": "few-json",
+      "question": "Does few-shot help without strict output?",
+      "n_pairs": 17,
+      "counts": {
+        "both_right": 16,
+        "both_wrong": 1,
+        "a_only": 0,
+        "b_only": 0
+      },
+      "p": 1,
+      "p_holm": 1,
+      "accuracy_diff": {
+        "point": 0,
+        "lo": 0,
+        "hi": 0
+      }
+    },
+    {
+      "id": "H2",
+      "a": "zero-json",
+      "b": "zero-strict",
+      "question": "Does strict output help without few-shot?",
+      "n_pairs": 17,
+      "counts": {
+        "both_right": 16,
+        "both_wrong": 1,
+        "a_only": 0,
+        "b_only": 0
+      },
+      "p": 1,
+      "p_holm": 1,
+      "accuracy_diff": {
+        "point": 0,
+        "lo": 0,
+        "hi": 0
+      }
+    },
+    {
+      "id": "H3",
+      "a": "zero-strict",
+      "b": "few-strict",
+      "question": "Does few-shot help with strict output?",
+      "n_pairs": 17,
+      "counts": {
+        "both_right": 16,
+        "both_wrong": 1,
+        "a_only": 0,
+        "b_only": 0
+      },
+      "p": 1,
+      "p_holm": 1,
+      "accuracy_diff": {
+        "point": 0,
+        "lo": 0,
+        "hi": 0
+      }
+    },
+    {
+      "id": "H4",
+      "a": "few-json",
+      "b": "few-strict",
+      "question": "Does strict output help with few-shot?",
+      "n_pairs": 17,
+      "counts": {
+        "both_right": 16,
+        "both_wrong": 1,
+        "a_only": 0,
+        "b_only": 0
+      },
+      "p": 1,
+      "p_holm": 1,
+      "accuracy_diff": {
+        "point": 0,
+        "lo": 0,
+        "hi": 0
+      }
+    }
+  ]
+}
