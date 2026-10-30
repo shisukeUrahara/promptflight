@@ -29,6 +29,7 @@ async function setup(llm: FakeLlm) {
     pricingFile: "pricing.json",
     makeLlm: () => llm,
     now: () => new Date("2026-10-29T10:00:00Z"),
+    repoState: () => ({ git_sha: "a".repeat(40), git_dirty: false, preregistration_sha: "b".repeat(40) }),
     out: () => {},
     err: (l) => errs.push(l),
   };

@@ -16,6 +16,7 @@ function setup() {
       throw new Error("no llm");
     },
     now: () => new Date(),
+    repoState: () => ({ git_sha: "a".repeat(40), git_dirty: false, preregistration_sha: "b".repeat(40) }),
     out: () => {},
     err: (l) => errs.push(l),
   };

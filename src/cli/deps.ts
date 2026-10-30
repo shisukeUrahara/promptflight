@@ -1,3 +1,4 @@
+import type { RepoState } from "@/core/artifacts/git";
 import type { LlmClient } from "@/core/llm/port";
 
 /** Everything a command touches outside its own arguments. Tests pass fakes. */
@@ -9,6 +10,8 @@ export interface Deps {
   /** Builds the live client. Throws NoApiKeyError when there is no key. */
   makeLlm(): LlmClient;
   now(): Date;
+  /** Git state of the code checkout (not of dataDir). Throws NotAGitRepoError outside one. */
+  repoState(): RepoState;
   out(line: string): void;
   err(line: string): void;
 }

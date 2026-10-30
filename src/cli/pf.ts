@@ -1,5 +1,6 @@
 import { existsSync } from "node:fs";
 import path from "node:path";
+import { repoState } from "@/core/artifacts/git";
 import { loadEnv } from "@/core/env";
 import { OpenAiClient } from "@/core/llm/openai";
 import { NoApiKeyError } from "./deps";
@@ -17,6 +18,7 @@ main(process.argv.slice(2), {
     return new OpenAiClient({ apiKey: env.apiKey });
   },
   now: () => new Date(),
+  repoState: () => repoState(process.cwd()),
   out: (line) => console.log(line),
   err: (line) => console.error(line),
 }).then((code) => process.exit(code));

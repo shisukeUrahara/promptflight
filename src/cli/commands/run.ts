@@ -1,6 +1,8 @@
 import { existsSync, mkdirSync } from "node:fs";
 import path from "node:path";
 import { parseArgs } from "node:util";
+import { DirtyTreeError, PreregistrationError, guardRun } from "@/core/artifacts/guard";
+import { NotAGitRepoError } from "@/core/artifacts/git";
 import { runId } from "@/core/artifacts/naming";
 import { loadPricing } from "@/core/cost/pricing";
 import { readJsonl, writeJsonl } from "@/core/dataset/jsonl";
@@ -57,6 +59,16 @@ export async function run(argv: string[], deps: Deps): Promise<number> {
   } catch (e) {
     deps.err((e as Error).message);
     return EXIT.USAGE;
+  }
+
+  try {
+    guardRun(split, deps.repoState(), values["allow-dirty"] ?? false);
+  } catch (e) {
+    if (e instanceof DirtyTreeError || e instanceof PreregistrationError || e instanceof NotAGitRepoError) {
+      deps.err(e.message);
+      return EXIT.DIRTY_TREE;
+    }
+    throw e;
   }
 
   const all = readJsonl(path.join(deps.dataDir, "fixtures", "tickets", "cases.jsonl"), Case);

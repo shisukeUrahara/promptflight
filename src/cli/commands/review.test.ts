@@ -39,6 +39,7 @@ beforeEach(() => {
       throw new Error("no llm");
     },
     now: () => new Date("2026-10-29T10:00:00Z"),
+    repoState: () => ({ git_sha: "a".repeat(40), git_dirty: false, preregistration_sha: "b".repeat(40) }),
     out: (l) => out.push(l),
     err: (l) => errs.push(l),
   };

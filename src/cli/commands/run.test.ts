@@ -2,6 +2,7 @@ import { existsSync, mkdtempSync, readFileSync, readdirSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { beforeEach, describe, expect, test } from "vitest";
+import { NotAGitRepoError } from "@/core/artifacts/git";
 import { writeJsonl } from "@/core/dataset/jsonl";
 import type { Case } from "@/core/domain/case";
 import { CATEGORIES } from "@/core/domain/labels";
@@ -70,6 +71,7 @@ beforeEach(() => {
     pricingFile: "pricing.json",
     makeLlm: () => llm,
     now: () => now,
+    repoState: () => ({ git_sha: "a".repeat(40), git_dirty: false, preregistration_sha: "b".repeat(40) }),
     out: (l) => out.push(l),
     err: (l) => errs.push(l),
   };
@@ -168,5 +170,35 @@ describe("pf run", () => {
     writeJsonl(path.join(dataDir, "fixtures/tickets/cases.jsonl"), cases);
     await main(["run", "--seed-set", "--variants", "zero-json"], deps);
     expect(rows(runs()[0])).toHaveLength(18);
+  });
+});
+
+describe("pf run guard", () => {
+  const dirty = { git_sha: "a".repeat(40), git_dirty: true, preregistration_sha: "b".repeat(40) };
+
+  test("holdout on a dirty tree exits 5 and calls nothing", async () => {
+    deps.repoState = () => dirty;
+    expect(await main(["run", "--split", "holdout"], deps)).toBe(EXIT.DIRTY_TREE);
+    expect(llm.calls).toHaveLength(0);
+    expect(errs.join()).toContain("uncommitted");
+  });
+  test("--allow-dirty lets it through", async () => {
+    deps.repoState = () => dirty;
+    expect(await main(["run", "--split", "holdout", "--allow-dirty"], deps)).toBe(EXIT.OK);
+  });
+  test("holdout without a committed pre-registration exits 5, even with --allow-dirty", async () => {
+    deps.repoState = () => ({ ...dirty, preregistration_sha: null });
+    expect(await main(["run", "--split", "holdout", "--allow-dirty"], deps)).toBe(EXIT.DIRTY_TREE);
+  });
+  test("tuning on a dirty tree is fine", async () => {
+    deps.repoState = () => dirty;
+    expect(await main(["run", "--split", "tuning"], deps)).toBe(EXIT.OK);
+  });
+  test("outside a git checkout exits 5 with a clear message", async () => {
+    deps.repoState = () => {
+      throw new NotAGitRepoError("/nowhere");
+    };
+    expect(await main(["run"], deps)).toBe(EXIT.DIRTY_TREE);
+    expect(errs.join()).toContain("git checkout");
   });
 });

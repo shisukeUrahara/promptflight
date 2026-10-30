@@ -20,6 +20,7 @@ function fakeDeps() {
       throw new NoApiKeyError();
     },
     now: () => new Date("2026-10-29T10:00:00Z"),
+    repoState: () => ({ git_sha: "a".repeat(40), git_dirty: false, preregistration_sha: "b".repeat(40) }),
     out: (l) => logs.push(l),
     err: (l) => errs.push(l),
   };
