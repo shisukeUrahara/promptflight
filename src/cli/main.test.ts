@@ -110,3 +110,16 @@ describe("pf spec-grid", () => {
     expect(readFileSync(file, "utf8")).toBe(first);
   });
 });
+
+describe("pf power", () => {
+  test("prints one line with the setup and the answer", async () => {
+    const { deps, logs } = fakeDeps();
+    expect(await main(["power", "--n", "90"], deps)).toBe(EXIT.OK);
+    expect(logs).toHaveLength(1);
+    expect(logs[0]).toMatch(/^N=90, 20% of tickets differ between variants, alpha=0.0125, power=0.8: smallest detectable accuracy difference = 0\.\d\d /);
+  });
+  test("rejects nonsense", async () => {
+    expect(await main(["power", "--n", "0"], fakeDeps().deps)).toBe(EXIT.USAGE);
+    expect(await main(["power", "--alpha", "2"], fakeDeps().deps)).toBe(EXIT.USAGE);
+  });
+});

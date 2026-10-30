@@ -2,6 +2,7 @@ import { NoApiKeyError, type Deps } from "./deps";
 import { EXIT } from "./exit";
 import { applyReview } from "./commands/applyReview";
 import { draftCases } from "./commands/draftCases";
+import { power } from "./commands/power";
 import { reviewSheet } from "./commands/reviewSheet";
 import { run } from "./commands/run";
 import { specGrid } from "./commands/specGrid";
@@ -14,6 +15,7 @@ const COMMANDS: Record<string, Command> = {
   "draft-cases": draftCases,
   "review-sheet": reviewSheet,
   "apply-review": applyReview,
+  power,
   run,
   verify,
 };
