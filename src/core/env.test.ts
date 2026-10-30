@@ -18,7 +18,7 @@ describe("loadEnv", () => {
     expect(() => loadEnv({ PF_READONLY: "yes" })).toThrow(/PF_READONLY/);
   });
   test("PF_MODEL picks the model under test", () => {
-    expect(loadEnv({ PF_MODEL: "gpt-4.1-nano-2025-04-14" }).model).toBe("gpt-4.1-nano-2025-04-14");
+    expect(loadEnv({ PF_MODEL: "gpt-4o-mini-2024-07-18" }).model).toBe("gpt-4o-mini-2024-07-18");
     expect(loadEnv({ PF_MODEL: "  " }).model).toBe("gpt-4.1-mini-2025-04-14");
   });
   test("PF_DATA_DIR overrides the folder", () => {

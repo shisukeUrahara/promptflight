@@ -142,6 +142,11 @@ export async function run(argv: string[], deps: Deps): Promise<number> {
   }
 
   const failed = results.filter(isInfra);
+  if (failed.length === results.length) {
+    // Nothing was scored: a bad key, a retired model, an outage. A run folder would only mislead.
+    deps.err(`every call failed (first: ${failed[0].variant} ${failed[0].case_id}: ${failed[0].code} ${failed[0].detail ?? ""}). No run folder was written.`);
+    return EXIT.INFRA_FAILURES;
+  }
   if (split === "holdout" && failed.length > 0) {
     deps.err(`${failed.length} calls still failed after one more try. A holdout run must have none, so no scores were written:`);
     failed.slice(0, 10).forEach((r) => deps.err(`  ${r.variant} ${r.case_id}: ${r.code} ${r.detail ?? ""}`));

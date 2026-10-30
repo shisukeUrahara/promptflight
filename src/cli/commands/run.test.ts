@@ -299,6 +299,15 @@ describe("holdout and infrastructure failures", () => {
     expect(rows(runs()[0])).toHaveLength(3);
   });
 
+  test("when every call fails, even a tuning run exits 3 and writes nothing", async () => {
+    deps.retryBackoffMs = [0, 0];
+    llm = new FakeLlm(() => http(404));
+    expect(await main(["run", "--variants", "zero-json"], deps)).toBe(EXIT.INFRA_FAILURES);
+    expect(runs()).toEqual([]);
+    expect(errs.join("\n")).toContain("every call failed");
+    expect(errs.join("\n")).toContain("provider_error 404");
+  });
+
   test("tuning tolerates a failed call: it is left out of the scores and counted in the manifest", async () => {
     deps.retryBackoffMs = [0, 0];
     llm = new FakeLlm((req) => (req.messages[1].content.includes("ticket 11") ? http(503) : ok(answer)));
@@ -314,18 +323,18 @@ describe("choosing the model", () => {
   const manifestOf = (id: string) => JSON.parse(readFileSync(path.join(dataDir, "experiments", id, "run_manifest.json"), "utf8"));
 
   test("--model changes the requests, the manifest, the label and the cache file", async () => {
-    expect(await main(["run", "--variants", "zero-json", "--model", "gpt-4.1-nano-2025-04-14"], deps)).toBe(EXIT.OK);
-    expect(llm.calls.every((c) => c.model === "gpt-4.1-nano-2025-04-14")).toBe(true);
+    expect(await main(["run", "--variants", "zero-json", "--model", "gpt-4o-mini-2024-07-18"], deps)).toBe(EXIT.OK);
+    expect(llm.calls.every((c) => c.model === "gpt-4o-mini-2024-07-18")).toBe(true);
     const m = manifestOf(runs()[0]);
-    expect(m.model).toBe("gpt-4.1-nano-2025-04-14");
-    expect(m.label).toContain("gpt-4.1-nano-2025-04-14");
-    expect(readdirSync(path.join(dataDir, "cache/responses"))).toEqual(["gpt-4.1-nano-2025-04-14.jsonl"]);
+    expect(m.model).toBe("gpt-4o-mini-2024-07-18");
+    expect(m.label).toContain("gpt-4o-mini-2024-07-18");
+    expect(readdirSync(path.join(dataDir, "cache/responses"))).toEqual(["gpt-4o-mini-2024-07-18.jsonl"]);
   });
 
   test("the model can come from deps (PF_MODEL), and the flag wins over it", async () => {
-    deps.model = "gpt-4.1-nano-2025-04-14";
+    deps.model = "gpt-4o-mini-2024-07-18";
     await main(["run", "--variants", "zero-json"], deps);
-    expect(manifestOf(runs()[0]).model).toBe("gpt-4.1-nano-2025-04-14");
+    expect(manifestOf(runs()[0]).model).toBe("gpt-4o-mini-2024-07-18");
     await main(["run", "--variants", "zero-json", "--model", "gpt-4.1-mini-2025-04-14"], deps);
     expect(manifestOf(runs()[1]).model).toBe("gpt-4.1-mini-2025-04-14");
   });
@@ -333,7 +342,7 @@ describe("choosing the model", () => {
   test("two models do not share cached answers", async () => {
     await main(["run", "--variants", "zero-json"], deps);
     const first = llm.calls.length;
-    await main(["run", "--variants", "zero-json", "--model", "gpt-4.1-nano-2025-04-14"], deps);
+    await main(["run", "--variants", "zero-json", "--model", "gpt-4o-mini-2024-07-18"], deps);
     expect(llm.calls.length).toBe(first * 2);
   });
 
