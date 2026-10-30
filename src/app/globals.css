@@ -17,7 +17,7 @@
   --success-bg: #e2f4f0;
   --warn: #8a5a00;
   --warn-bg: #fbf0d9;
-  --danger: #c2463d;
+  --danger: #a8382f; /* 5.2:1 on --danger-bg; SearchLab's #c2463d was 4.0:1 */
   --danger-bg: #f9e3e0;
   --v-zero-json: #e0782e;
   --v-zero-strict: #3b6ff0;
