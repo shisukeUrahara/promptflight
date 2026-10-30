@@ -2,7 +2,8 @@ import { mkdirSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { parseArgs } from "node:util";
 import { writeManifest } from "@/core/dataset/manifest";
-import { buildSpecGrid } from "@/core/dataset/specGrid";
+import { buildHardGrid } from "@/core/dataset/hardGrid";
+import { SpecRow, buildSpecGrid } from "@/core/dataset/specGrid";
 import type { Deps } from "../deps";
 import { EXIT } from "../exit";
 
@@ -15,7 +16,9 @@ export async function specGrid(argv: string[], deps: Deps): Promise<number> {
     deps.err(`--seed must be an integer, got "${values.seed}"`);
     return EXIT.USAGE;
   }
-  const rows = buildSpecGrid(seed);
+  const first = buildSpecGrid(seed);
+  const used = new Set(first.flatMap((r) => (r.order_id ? [r.order_id] : [])));
+  const rows = [...first, ...buildHardGrid(seed, used).map((r) => SpecRow.parse(r))];
   const file = path.join(deps.dataDir, "fixtures", "tickets", "spec_grid.jsonl");
   mkdirSync(path.dirname(file), { recursive: true });
   writeFileSync(file, rows.map((r) => JSON.stringify(r)).join("\n") + "\n");

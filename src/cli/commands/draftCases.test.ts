@@ -53,10 +53,10 @@ describe("pf draft-cases", () => {
     const { deps, drafts } = await setup(llm);
     await main(["draft-cases", "--limit", "3"], deps);
     await main(["draft-cases"], deps);
-    expect(llm.calls).toHaveLength(144);
-    expect(new Set(drafts().map((d) => d.case_id)).size).toBe(144);
+    expect(llm.calls).toHaveLength(204);
+    expect(new Set(drafts().map((d) => d.case_id)).size).toBe(204);
     await main(["draft-cases"], deps);
-    expect(llm.calls).toHaveLength(144);
+    expect(llm.calls).toHaveLength(204);
   });
 
   test("a cost estimate above --max-usd exits 4 with 0 calls", async () => {

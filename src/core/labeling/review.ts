@@ -163,6 +163,7 @@ export function buildCases(
       gold: { ...gold, order_id: row.order_id },
       injection: row.injection,
       provenance: { drafted_by: draft.drafted_by, intended: row.intended, human_label: human, adjudicated },
+      ...(row.batch ? { batch: row.batch } : {}),
     });
   }
 

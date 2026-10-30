@@ -49,10 +49,13 @@ describe("usage errors", () => {
 describe("pf spec-grid", () => {
   const { deps, file } = fakeDeps();
   let rows: SpecRow[];
+  let all: SpecRow[];
 
   test("writes valid rows", async () => {
     expect(await main(["spec-grid"], deps)).toBe(EXIT.OK);
-    rows = readFileSync(file, "utf8").trim().split("\n").map((l) => SpecRow.parse(JSON.parse(l)));
+    all = readFileSync(file, "utf8").trim().split("\n").map((l) => SpecRow.parse(JSON.parse(l)));
+    expect(all).toHaveLength(204);
+    rows = all.filter((r) => !r.batch); // the first 144
     expect(rows).toHaveLength(144);
     expect(new Set(rows.map((r) => r.case_id)).size).toBe(144);
   });
@@ -103,6 +106,44 @@ describe("pf spec-grid", () => {
       const ids = rows.filter((r) => r.intended.category === category && r.slice === "ambiguous_pair").map((r) => r.pair_id).sort();
       expect(ids).toEqual([...PAIRS_PER_CATEGORY[category]].sort());
     }
+  });
+
+  test("the first 144 rows carry no batch field, so their bytes did not change", () => {
+    const lines = readFileSync(file, "utf8").trim().split("\n");
+    expect(lines.slice(0, 144).every((l) => !l.includes("batch"))).toBe(true);
+    expect(lines.slice(144).every((l) => l.includes('"batch":"hard"'))).toBe(true);
+  });
+
+  describe("hard batch", () => {
+    const hard = () => all.filter((r) => r.batch === "hard");
+    const count = <T,>(xs: T[], f: (x: T) => string) => xs.reduce<Record<string, number>>((m, x) => ({ ...m, [f(x)]: (m[f(x)] ?? 0) + 1 }), {});
+
+    test("60 tickets numbered t-145 to t-204", () => {
+      expect(hard().map((r) => r.case_id).sort()).toEqual(Array.from({ length: 60 }, (_, i) => `t-${145 + i}`));
+    });
+    test("12 tuning, 48 holdout, none for few-shot", () => {
+      expect(count(hard(), (r) => r.split)).toEqual({ tuning: 12, holdout: 48 });
+    });
+    test("30 ambiguous, 15 injection, 15 multi-issue; tuning has a share of each", () => {
+      expect(count(hard(), (r) => r.slice)).toEqual({ ambiguous_pair: 30, injection: 15, noisy: 15 });
+      expect(count(hard().filter((r) => r.split === "tuning"), (r) => r.slice)).toEqual({ ambiguous_pair: 6, injection: 3, noisy: 3 });
+    });
+    test("3 ambiguous tickets per side of every pair", () => {
+      const sides = count(hard().filter((r) => r.slice === "ambiguous_pair"), (r) => `${r.pair_id}/${r.intended.category}`);
+      expect(Object.values(sides)).toEqual(Array(10).fill(3));
+    });
+    test("every injection asks for something the truth is not", () => {
+      for (const r of hard().filter((r) => r.slice === "injection")) {
+        const truth = r.injection!.field === "category" ? r.intended.category : r.intended.priority;
+        expect(r.injection!.value).not.toBe(truth);
+      }
+    });
+    test("priorities 12 / 18 / 18 / 12 and 30 order ids, unique across all 204", () => {
+      expect(count(hard(), (r) => r.intended.priority)).toEqual({ low: 12, normal: 18, high: 18, urgent: 12 });
+      expect(hard().filter((r) => r.order_id)).toHaveLength(30);
+      const ids = all.flatMap((r) => (r.order_id ? [r.order_id] : []));
+      expect(new Set(ids).size).toBe(ids.length);
+    });
   });
 
   test("a second run writes identical bytes", async () => {

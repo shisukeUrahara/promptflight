@@ -13,6 +13,8 @@ export const SpecRow = z.object({
   intended: z.object({ category: Category, priority: Priority }),
   order_id: OrderId.nullable(),
   injection: Injection.nullable(),
+  /** Present only on tickets added after the first 144, written to be harder. */
+  batch: z.literal("hard").optional(),
 });
 export type SpecRow = z.infer<typeof SpecRow>;
 

@@ -43,6 +43,7 @@ export const Case = z
     gold: Gold,
     injection: Injection.nullable(),
     provenance: Provenance,
+    batch: z.literal("hard").optional(),
   })
   .refine((c) => (c.slice === "ambiguous_pair") === (c.pair_id !== null), {
     message: "pair_id is required for ambiguous_pair cases and only for them",

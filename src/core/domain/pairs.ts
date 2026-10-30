@@ -9,6 +9,12 @@ export const AMBIGUOUS_PAIRS = [
   { id: "other-vs-feature", categories: ["other", "feature_request"] },
 ] as const;
 
+/** The other category of the first pair that contains `category`. */
+export function partnerOf(category: Category): Category {
+  const pair = AMBIGUOUS_PAIRS.find((p) => (p.categories as readonly string[]).includes(category))!;
+  return pair.categories.find((c) => c !== category) as Category;
+}
+
 export type PairId = (typeof AMBIGUOUS_PAIRS)[number]["id"];
 
 /** The pair behind each of a category's 4 ambiguous tickets. */
