@@ -17,6 +17,7 @@ main(process.argv.slice(2), {
     if (!env.apiKey) throw new NoApiKeyError();
     return new OpenAiClient({ apiKey: env.apiKey });
   },
+  model: env.model,
   now: () => new Date(),
   repoState: () => repoState(process.cwd()),
   out: (line) => console.log(line),

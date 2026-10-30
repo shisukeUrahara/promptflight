@@ -8,9 +8,9 @@ export function runId(createdAt: Date, split: string): string {
 }
 
 /** `Holdout set · 4 variants · 31 Oct 2026 10:15 UTC`. Built by hand: strftime's %-d is not portable. */
-export function runLabel(opts: { split: string; variantCount: number; createdAt: Date }): string {
+export function runLabel(opts: { split: string; variantCount: number; createdAt: Date; model?: string }): string {
   const d = opts.createdAt;
   const when = `${d.getUTCDate()} ${MONTHS[d.getUTCMonth()]} ${d.getUTCFullYear()} ${pad(d.getUTCHours())}:${pad(d.getUTCMinutes())} UTC`;
   const n = opts.variantCount;
-  return [SPLIT_LABEL[opts.split] ?? opts.split, `${n} variant${n === 1 ? "" : "s"}`, when].join(" · ");
+  return [SPLIT_LABEL[opts.split] ?? opts.split, `${n} variant${n === 1 ? "" : "s"}`, ...(opts.model ? [opts.model] : []), when].join(" · ");
 }

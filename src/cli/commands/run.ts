@@ -37,6 +37,7 @@ export async function run(argv: string[], deps: Deps): Promise<number> {
       replay: { type: "boolean" },
       "allow-dirty": { type: "boolean" },
       "seed-set": { type: "boolean" },
+      model: { type: "string" },
     },
   });
   const split = values.split as string;
@@ -104,8 +105,14 @@ export async function run(argv: string[], deps: Deps): Promise<number> {
   }
   const llm = new CachingLlm(inner, { dir: path.join(deps.dataDir, "cache", "responses"), now: deps.now });
 
+  const model = values.model ?? deps.model ?? MODEL_UNDER_TEST;
   const pricing = loadPricing(deps.pricingFile);
+  if (!pricing.models[model]) {
+    deps.err(`no price for model "${model}" in pricing.json. Add it (with its source and date) before running.`);
+    return EXIT.USAGE;
+  }
   const runOpts = {
+    model,
     variants,
     cases,
     pool: all,
@@ -144,14 +151,14 @@ export async function run(argv: string[], deps: Deps): Promise<number> {
   const created = deps.now();
   const id = uniqueRunId(path.join(deps.dataDir, "experiments"), runId(created, split));
   const casesFile = path.join(deps.dataDir, "fixtures", "tickets", "cases.jsonl");
-  const scores = buildScores({ results, cases: all, pricing, model: MODEL_UNDER_TEST, split });
+  const scores = buildScores({ results, cases: all, pricing, model, split });
   const manifest = RunManifest.parse({
     run_id: id,
-    label: runLabel({ split, variantCount: variants.length, createdAt: created }),
+    label: runLabel({ split, variantCount: variants.length, createdAt: created, model }),
     created_at_utc: created.toISOString(),
     split,
     sample_count: cases.length,
-    model: MODEL_UNDER_TEST,
+    model,
     variants: Object.fromEntries(variants.map((v) => [v.name, v.version.id])),
     temperature: TEMPERATURE,
     max_completion_tokens: MAX_COMPLETION_TOKENS,

@@ -18,7 +18,7 @@ import { EXIT } from "../exit";
 export async function gate(argv: string[], deps: Deps): Promise<number> {
   const { values } = parseArgs({
     args: argv,
-    options: { baseline: { type: "string" }, candidate: { type: "string" }, split: { type: "string", default: "tuning" }, alpha: { type: "string", default: "0.05" } },
+    options: { baseline: { type: "string" }, candidate: { type: "string" }, split: { type: "string", default: "tuning" }, alpha: { type: "string", default: "0.05" }, model: { type: "string" } },
   });
   const alpha = Number(values.alpha);
   if (!values.baseline || !values.candidate || (values.split !== "tuning" && values.split !== "holdout") || !(alpha > 0 && alpha < 1)) {
@@ -51,6 +51,7 @@ export async function gate(argv: string[], deps: Deps): Promise<number> {
       ],
       cases,
       pool: all,
+      model: values.model ?? deps.model,
       llm: new CachingLlm(null, { dir: path.join(deps.dataDir, "cache", "responses") }),
     });
   } catch (e) {

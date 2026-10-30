@@ -215,7 +215,7 @@ describe("pf run folder", () => {
     const manifest = RunManifest.parse(JSON.parse(readFileSync(folder(id, "run_manifest.json"), "utf8")));
     expect(manifest).toMatchObject({
       run_id: id,
-      label: "Tuning set · 4 variants · 31 Oct 2026 10:15 UTC",
+      label: "Tuning set · 4 variants · gpt-4.1-mini-2025-04-14 · 31 Oct 2026 10:15 UTC",
       split: "tuning",
       sample_count: 6,
       model: "gpt-4.1-mini-2025-04-14",
@@ -307,5 +307,39 @@ describe("holdout and infrastructure failures", () => {
     expect(JSON.parse(readFileSync(path.join(dataDir, "experiments", id, "run_manifest.json"), "utf8")).infra_failures).toBe(1);
     const scores = JSON.parse(readFileSync(path.join(dataDir, "experiments", id, "scores.json"), "utf8"));
     expect(scores.variants[0]).toMatchObject({ n_total: 6, n_scored: 5, n_infra: 1 });
+  });
+});
+
+describe("choosing the model", () => {
+  const manifestOf = (id: string) => JSON.parse(readFileSync(path.join(dataDir, "experiments", id, "run_manifest.json"), "utf8"));
+
+  test("--model changes the requests, the manifest, the label and the cache file", async () => {
+    expect(await main(["run", "--variants", "zero-json", "--model", "gpt-4.1-nano-2025-04-14"], deps)).toBe(EXIT.OK);
+    expect(llm.calls.every((c) => c.model === "gpt-4.1-nano-2025-04-14")).toBe(true);
+    const m = manifestOf(runs()[0]);
+    expect(m.model).toBe("gpt-4.1-nano-2025-04-14");
+    expect(m.label).toContain("gpt-4.1-nano-2025-04-14");
+    expect(readdirSync(path.join(dataDir, "cache/responses"))).toEqual(["gpt-4.1-nano-2025-04-14.jsonl"]);
+  });
+
+  test("the model can come from deps (PF_MODEL), and the flag wins over it", async () => {
+    deps.model = "gpt-4.1-nano-2025-04-14";
+    await main(["run", "--variants", "zero-json"], deps);
+    expect(manifestOf(runs()[0]).model).toBe("gpt-4.1-nano-2025-04-14");
+    await main(["run", "--variants", "zero-json", "--model", "gpt-4.1-mini-2025-04-14"], deps);
+    expect(manifestOf(runs()[1]).model).toBe("gpt-4.1-mini-2025-04-14");
+  });
+
+  test("two models do not share cached answers", async () => {
+    await main(["run", "--variants", "zero-json"], deps);
+    const first = llm.calls.length;
+    await main(["run", "--variants", "zero-json", "--model", "gpt-4.1-nano-2025-04-14"], deps);
+    expect(llm.calls.length).toBe(first * 2);
+  });
+
+  test("a model with no price in pricing.json is refused before any call", async () => {
+    expect(await main(["run", "--model", "gpt-9-imaginary"], deps)).toBe(EXIT.USAGE);
+    expect(errs.join()).toContain('no price for model "gpt-9-imaginary"');
+    expect(llm.calls).toHaveLength(0);
   });
 });

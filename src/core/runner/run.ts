@@ -19,6 +19,8 @@ export interface RunOptions {
   /** Every case known, so few-shot prompts can pick their examples from the fewshot split. */
   pool: readonly Case[];
   llm: LlmClient;
+  /** Model under test. Default is the pinned gpt-4.1-mini snapshot. */
+  model?: string;
   concurrency?: number;
   /** When set, the run is refused before its first call if the estimate is above the limit. */
   budget?: Budget;
@@ -60,7 +62,7 @@ type Variant = RunOptions["variants"][number];
 
 function requestFor(opts: RunOptions, variant: Variant, c: Case): LlmRequest {
   const { version } = variant;
-  return buildRequest(version.output_mode, renderMessages(version, { ticket: c.text, cases: opts.pool }));
+  return buildRequest(version.output_mode, renderMessages(version, { ticket: c.text, cases: opts.pool }), opts.model);
 }
 
 async function runOne(opts: RunOptions, variant: Variant, c: Case): Promise<CaseResult> {

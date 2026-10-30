@@ -3,7 +3,7 @@ import { loadEnv } from "./env";
 
 describe("loadEnv", () => {
   test("no key means replay mode", () => {
-    expect(loadEnv({}, "/work")).toEqual({ mode: "replay", apiKey: null, readonly: false, dataDir: "/work" });
+    expect(loadEnv({}, "/work")).toEqual({ mode: "replay", apiKey: null, readonly: false, dataDir: "/work", model: "gpt-4.1-mini-2025-04-14" });
     expect(loadEnv({ OPENAI_API_KEY: "  " }).mode).toBe("replay");
   });
   test("a key means live mode", () => {
@@ -16,6 +16,10 @@ describe("loadEnv", () => {
   });
   test("a bad PF_READONLY throws and names the variable", () => {
     expect(() => loadEnv({ PF_READONLY: "yes" })).toThrow(/PF_READONLY/);
+  });
+  test("PF_MODEL picks the model under test", () => {
+    expect(loadEnv({ PF_MODEL: "gpt-4.1-nano-2025-04-14" }).model).toBe("gpt-4.1-nano-2025-04-14");
+    expect(loadEnv({ PF_MODEL: "  " }).model).toBe("gpt-4.1-mini-2025-04-14");
   });
   test("PF_DATA_DIR overrides the folder", () => {
     expect(loadEnv({ PF_DATA_DIR: "/data" }, "/work").dataDir).toBe("/data");

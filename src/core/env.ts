@@ -1,9 +1,11 @@
 import { z } from "zod";
+import { MODEL_UNDER_TEST } from "./llm/strict";
 
 const Raw = z.object({
   OPENAI_API_KEY: z.string().trim().optional(),
   PF_READONLY: z.enum(["", "0", "1"]).optional(),
   PF_DATA_DIR: z.string().trim().optional(),
+  PF_MODEL: z.string().trim().optional(),
 });
 
 export interface Env {
@@ -12,6 +14,8 @@ export interface Env {
   apiKey: string | null;
   readonly: boolean;
   dataDir: string;
+  /** Model under test. A dated snapshot, so results do not drift. */
+  model: string;
 }
 
 /** Reads the three variables PromptFlight knows. A bad value throws and names it. */
@@ -27,5 +31,6 @@ export function loadEnv(source: Record<string, string | undefined>, cwd = proces
     apiKey,
     readonly: parsed.data.PF_READONLY === "1",
     dataDir: parsed.data.PF_DATA_DIR || cwd,
+    model: parsed.data.PF_MODEL || MODEL_UNDER_TEST,
   };
 }

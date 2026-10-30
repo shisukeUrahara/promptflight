@@ -9,6 +9,8 @@ export interface Deps {
   pricingFile: string;
   /** Builds the live client. Throws NoApiKeyError when there is no key. */
   makeLlm(): LlmClient;
+  /** Model under test when --model is not given. Default gpt-4.1-mini-2025-04-14. */
+  model?: string;
   now(): Date;
   /** Wait before each retry of a failed call. Tests shorten it. Default 1 s then 4 s. */
   retryBackoffMs?: number[];
