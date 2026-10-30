@@ -10,12 +10,22 @@ import type { CaseResult } from "../runner/types";
 export const BOOTSTRAP_SEED = 20261029;
 
 /** The four comparisons fixed before the holdout run. `b` is the treatment, `a` the baseline. */
-export const CONTRASTS = [
-  { id: "H1", a: "zero-json", b: "few-json", question: "Does few-shot help without strict output?" },
-  { id: "H2", a: "zero-json", b: "zero-strict", question: "Does strict output help without few-shot?" },
-  { id: "H3", a: "zero-strict", b: "few-strict", question: "Does few-shot help with strict output?" },
-  { id: "H4", a: "few-json", b: "few-strict", question: "Does strict output help with few-shot?" },
+const PAIRS = [
+  { a: "zero-json", b: "few-json", question: "Does few-shot help without strict output?" },
+  { a: "zero-json", b: "zero-strict", question: "Does strict output help without few-shot?" },
+  { a: "zero-strict", b: "few-strict", question: "Does few-shot help with strict output?" },
+  { a: "few-json", b: "few-strict", question: "Does strict output help with few-shot?" },
 ] as const;
+
+/**
+ * The comparisons fixed before the holdout run. `b` is the treatment, `a` the baseline.
+ * H1-H4 compare category accuracy (primary). H5-H8 ask the same four questions of
+ * priority accuracy (secondary), added after the tuning runs showed category near the ceiling.
+ */
+export const CONTRASTS = [
+  ...PAIRS.map((p, i) => ({ id: `H${i + 1}`, metric: "category" as const, ...p })),
+  ...PAIRS.map((p, i) => ({ id: `H${i + 5}`, metric: "priority" as const, ...p })),
+];
 
 export interface VariantReport extends VariantScores {
   accuracy_ci: Pick<Ci, "lo" | "hi">;
@@ -24,16 +34,18 @@ export interface VariantReport extends VariantScores {
 
 export interface ContrastReport {
   id: string;
+  /** Which answer is compared: the category (primary) or the priority (secondary). */
+  metric: "category" | "priority";
   a: string;
   b: string;
   question: string;
   /** Tickets answered by both variants. Tickets where either had an infrastructure failure are left out. */
   n_pairs: number;
   counts: PairedCounts;
-  /** Exact McNemar p-value, and the same after Holm over the contrasts in this run. */
+  /** Exact McNemar p-value, and the same after Holm within its family (same metric) in this run. */
   p: number;
   p_holm: number;
-  /** Accuracy of b minus accuracy of a, with a paired bootstrap interval. */
+  /** Accuracy (on `metric`) of b minus a, with a paired bootstrap interval. */
   accuracy_diff: Ci;
 }
 
@@ -68,26 +80,30 @@ export function buildScores(opts: { results: readonly CaseResult[]; cases: reado
   const present = CONTRASTS.filter((c) => names.includes(c.a) && names.includes(c.b));
   const raw = present.map((c) => {
     const rowsA = new Map(rowsOf(c.a).map((r) => [r.case_id, r]));
+    const right = (r: CaseResult) => r.prediction !== null && r.prediction[c.metric] === byId.get(r.case_id)!.gold[c.metric];
     const pairs = rowsOf(c.b)
       .filter((rb) => rowsA.has(rb.case_id) && !isInfra(rb) && !isInfra(rowsA.get(rb.case_id)!))
-      .map((rb) => {
-        const gold = byId.get(rb.case_id)!.gold.category;
-        const ra = rowsA.get(rb.case_id)!;
-        return { a: { gold, pred: ra.prediction?.category ?? null } as Scored, b: { gold, pred: rb.prediction?.category ?? null } as Scored };
-      });
-    const counts = pairedCounts(pairs.map((p) => p.a.pred === p.a.gold), pairs.map((p) => p.b.pred === p.b.gold));
-    return { c, n: pairs.length, counts, p: mcnemarExact(counts), diff: pairedBootstrapCi(pairs, accuracy, ciOpts) };
+      .map((rb) => ({ a: right(rowsA.get(rb.case_id)!), b: right(rb) }));
+    const counts = pairedCounts(pairs.map((p) => p.a), pairs.map((p) => p.b));
+    const share = (xs: boolean[]) => (xs.length === 0 ? 0 : xs.filter(Boolean).length / xs.length);
+    return { c, n: pairs.length, counts, p: mcnemarExact(counts), diff: pairedBootstrapCi(pairs, share, ciOpts) };
   });
-  const adjusted = holm(raw.map((r) => r.p));
-  const contrasts: ContrastReport[] = raw.map((r, i) => ({
+  // Holm runs within each family: category is the primary question, priority the secondary one.
+  const adjusted = new Map<string, number>();
+  for (const metric of ["category", "priority"] as const) {
+    const family = raw.filter((r) => r.c.metric === metric);
+    holm(family.map((r) => r.p)).forEach((p, i) => adjusted.set(family[i].c.id, p));
+  }
+  const contrasts: ContrastReport[] = raw.map((r) => ({
     id: r.c.id,
+    metric: r.c.metric,
     a: r.c.a,
     b: r.c.b,
     question: r.c.question,
     n_pairs: r.n,
     counts: r.counts,
     p: r.p,
-    p_holm: adjusted[i],
+    p_holm: adjusted.get(r.c.id)!,
     accuracy_diff: r.diff,
   }));
 
@@ -122,9 +138,10 @@ export function formatSummary(scores: RunScores): string[] {
   const line = (cells: string[]) => cells.map((c, i) => c.padEnd(widths[i])).join("  ").trimEnd();
   const out = [line(head), line(widths.map((w) => "-".repeat(w))), ...body.map(line)];
   if (scores.contrasts.length > 0) {
-    const heads = ["contrast (b minus a)", "pairs", "a-only", "b-only", "diff [95% CI]", "p", "p (Holm)"];
+    const heads = ["contrast (b minus a)", "metric", "pairs", "a-only", "b-only", "diff [95% CI]", "p", "p (Holm)"];
     const rows = scores.contrasts.map((c) => [
       `${c.id} ${c.b} vs ${c.a}`,
+      c.metric,
       String(c.n_pairs),
       String(c.counts.a_only),
       String(c.counts.b_only),

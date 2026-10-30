@@ -1068,6 +1068,7 @@
   "contrasts": [
     {
       "id": "H1",
+      "metric": "category",
       "a": "zero-json",
       "b": "few-json",
       "question": "Does few-shot help without strict output?",
@@ -1088,6 +1089,7 @@
     },
     {
       "id": "H2",
+      "metric": "category",
       "a": "zero-json",
       "b": "zero-strict",
       "question": "Does strict output help without few-shot?",
@@ -1108,6 +1110,7 @@
     },
     {
       "id": "H3",
+      "metric": "category",
       "a": "zero-strict",
       "b": "few-strict",
       "question": "Does few-shot help with strict output?",
@@ -1128,6 +1131,7 @@
     },
     {
       "id": "H4",
+      "metric": "category",
       "a": "few-json",
       "b": "few-strict",
       "question": "Does strict output help with few-shot?",
@@ -1144,6 +1148,90 @@
         "point": 0.11111111111111116,
         "lo": 0,
         "hi": 0.2592592592592592
+      }
+    },
+    {
+      "id": "H5",
+      "metric": "priority",
+      "a": "zero-json",
+      "b": "few-json",
+      "question": "Does few-shot help without strict output?",
+      "n_pairs": 27,
+      "counts": {
+        "both_right": 24,
+        "both_wrong": 1,
+        "a_only": 1,
+        "b_only": 1
+      },
+      "p": 1,
+      "p_holm": 1,
+      "accuracy_diff": {
+        "point": 0,
+        "lo": -0.11111111111111116,
+        "hi": 0.11111111111111116
+      }
+    },
+    {
+      "id": "H6",
+      "metric": "priority",
+      "a": "zero-json",
+      "b": "zero-strict",
+      "question": "Does strict output help without few-shot?",
+      "n_pairs": 27,
+      "counts": {
+        "both_right": 25,
+        "both_wrong": 0,
+        "a_only": 0,
+        "b_only": 2
+      },
+      "p": 0.5,
+      "p_holm": 1,
+      "accuracy_diff": {
+        "point": 0.07407407407407407,
+        "lo": 0,
+        "hi": 0.18518518518518523
+      }
+    },
+    {
+      "id": "H7",
+      "metric": "priority",
+      "a": "zero-strict",
+      "b": "few-strict",
+      "question": "Does few-shot help with strict output?",
+      "n_pairs": 27,
+      "counts": {
+        "both_right": 27,
+        "both_wrong": 0,
+        "a_only": 0,
+        "b_only": 0
+      },
+      "p": 1,
+      "p_holm": 1,
+      "accuracy_diff": {
+        "point": 0,
+        "lo": 0,
+        "hi": 0
+      }
+    },
+    {
+      "id": "H8",
+      "metric": "priority",
+      "a": "few-json",
+      "b": "few-strict",
+      "question": "Does strict output help with few-shot?",
+      "n_pairs": 27,
+      "counts": {
+        "both_right": 25,
+        "both_wrong": 0,
+        "a_only": 0,
+        "b_only": 2
+      },
+      "p": 0.5,
+      "p_holm": 1,
+      "accuracy_diff": {
+        "point": 0.07407407407407407,
+        "lo": 0,
+        "hi": 0.18518518518518523
       }
     }
   ]

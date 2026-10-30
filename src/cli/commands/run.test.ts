@@ -251,10 +251,13 @@ describe("pf run folder", () => {
     expect(JSON.parse(readFileSync(folder(second, "run_manifest.json"), "utf8")).replay).toBe(true);
   });
 
-  test("all four pre-registered contrasts appear, Holm is never below the raw p", async () => {
+  test("all eight contrasts appear in two families, Holm is never below the raw p", async () => {
     await main(["run"], deps);
     const scores = JSON.parse(readFileSync(folder(runs()[0], "scores.json"), "utf8"));
-    expect(scores.contrasts.map((c: { id: string }) => c.id)).toEqual(["H1", "H2", "H3", "H4"]);
+    expect(scores.contrasts.map((c: { id: string; metric: string }) => `${c.id}:${c.metric}`)).toEqual([
+      "H1:category", "H2:category", "H3:category", "H4:category",
+      "H5:priority", "H6:priority", "H7:priority", "H8:priority",
+    ]);
     for (const c of scores.contrasts) {
       expect(c.n_pairs).toBe(6);
       expect(c.counts.both_right + c.counts.both_wrong + c.counts.a_only + c.counts.b_only).toBe(6);
@@ -265,7 +268,22 @@ describe("pf run folder", () => {
   test("only the contrasts whose two variants ran are reported", async () => {
     await main(["run", "--variants", "zero-json,few-json"], deps);
     const scores = JSON.parse(readFileSync(folder(runs()[0], "scores.json"), "utf8"));
-    expect(scores.contrasts.map((c: { id: string }) => c.id)).toEqual(["H1"]);
+    expect(scores.contrasts.map((c: { id: string }) => c.id)).toEqual(["H1", "H5"]);
+  });
+
+  test("the priority family compares priority answers, with Holm applied within the family", async () => {
+    // zero-json always answers priority "low" (right); few-json answers "high" (wrong) on every ticket.
+    llm = new FakeLlm((req) =>
+      ok(req.messages[1].content.includes("Example 1") ? '{"category":"other","priority":"high","order_id":null}' : answer),
+    );
+    await main(["run", "--variants", "zero-json,few-json"], deps);
+    const scores = JSON.parse(readFileSync(folder(runs()[0], "scores.json"), "utf8"));
+    const h5 = scores.contrasts.find((c: { id: string }) => c.id === "H5");
+    expect(h5).toMatchObject({ metric: "priority", a: "zero-json", b: "few-json", counts: { a_only: 6, b_only: 0 } });
+    expect(h5.accuracy_diff.point).toBe(-1);
+    expect(h5.p_holm).toBe(h5.p); // one contrast in its family: nothing to adjust
+    const h1 = scores.contrasts.find((c: { id: string }) => c.id === "H1");
+    expect(h1.counts.a_only + h1.counts.b_only).toBe(h1.n_pairs - h1.counts.both_right - h1.counts.both_wrong);
   });
 
   test("prints a summary table with a row per variant", async () => {
@@ -275,7 +293,7 @@ describe("pf run folder", () => {
     for (const name of ["zero-json", "zero-strict", "few-json", "few-strict"]) expect(text).toContain(name);
     expect(text).toContain("H1 few-json vs zero-json");
     // columns are separated even when a label is the longest cell
-    expect(text).toMatch(/H3 few-strict vs zero-strict {2,}\d/);
+    expect(text).toMatch(/H3 few-strict vs zero-strict {2,}category {2,}\d/);
   });
 });
 
