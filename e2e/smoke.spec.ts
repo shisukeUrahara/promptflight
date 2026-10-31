@@ -1,9 +1,9 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test, type Page } from "@playwright/test";
 
-const PAGES = ["/", "/cases", "/prompts"];
+const PAGES = ["/", "/results", "/cases", "/prompts"];
 // Every state a visitor can reach, checked at every width and in both themes.
-const STATES = [...PAGES, "/?metric=priority", "/cases?disagree=1", "/cases?slice=injection", "/prompts?name=few-strict"];
+const STATES = [...PAGES, "/results?metric=priority", "/cases?disagree=1", "/cases?slice=injection", "/prompts?name=few-strict"];
 
 async function cannotScrollSideways(page: Page) {
   const x = await page.evaluate(() => {
@@ -25,7 +25,7 @@ test("navigation reaches every page", async ({ page, isMobile }) => {
   await page.goto("/");
   if (isMobile) await page.getByRole("button", { name: "Open menu" }).click();
   const nav = page.getByRole("navigation", { name: isMobile ? "Mobile" : "Main" });
-  for (const [label, heading] of [["Cases", "Cases"], ["Prompts", "Prompts"], ["Experiments", "Experiments"]]) {
+  for (const [label, heading] of [["Cases", "Cases"], ["Prompts", "Prompts"], ["Experiments", "Results"]]) {
     await nav.getByRole("link", { name: label }).click();
     await expect(page.getByRole("heading", { level: 1, name: heading })).toBeVisible();
     if (isMobile && label !== "Experiments") await page.getByRole("button", { name: "Open menu" }).click();

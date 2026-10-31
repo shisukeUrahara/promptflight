@@ -7,7 +7,7 @@ import { Logo } from "./Logo";
 import { ThemeToggle } from "./ThemeToggle";
 
 export const LINKS = [
-  { href: "/", label: "Experiments" },
+  { href: "/results", label: "Experiments" },
   { href: "/cases", label: "Cases" },
   { href: "/prompts", label: "Prompts" },
 ];

@@ -45,7 +45,7 @@ test("a ticket opens in a dialog with the raw answers; Esc closes it and focus r
 });
 
 test("a confusion-matrix cell lands on exactly its tickets", async ({ page }) => {
-  await page.goto("/");
+  await page.goto("/results");
   const cell = page.getByRole("link", { name: /tickets with gold/ }).first();
   const n = Number((await cell.textContent())!.trim());
   await cell.click();

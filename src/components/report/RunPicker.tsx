@@ -1,7 +1,7 @@
 import type { RunSummary } from "@/core/artifacts/runs";
 import { AutoSubmitSelect } from "../AutoSubmitSelect";
 
-export function RunPicker({ runs, current, action = "/" }: { runs: RunSummary[]; current: string; action?: string }) {
+export function RunPicker({ runs, current, action = "/results" }: { runs: RunSummary[]; current: string; action?: string }) {
   return (
     <form method="get" action={action} className="flex min-w-0 items-center gap-2">
       <label htmlFor="run" className="shrink-0 text-sm text-muted">

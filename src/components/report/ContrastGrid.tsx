@@ -9,7 +9,7 @@ export const SIGNIFICANT = 0.05;
 export function MetricSwitch({ runId, metric }: { runId: string; metric: "category" | "priority" }) {
   const item = (m: "category" | "priority", label: string) => (
     <Link
-      href={`/?run=${runId}${m === "priority" ? "&metric=priority" : ""}`}
+      href={`/results?run=${runId}${m === "priority" ? "&metric=priority" : ""}`}
       aria-current={metric === m ? "true" : undefined}
       className="rounded-md px-3 py-1.5 text-sm text-muted aria-[current=true]:bg-surface aria-[current=true]:font-medium aria-[current=true]:text-ink aria-[current=true]:shadow-card"
     >

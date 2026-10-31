@@ -8,7 +8,7 @@ const tuning = runs.find((r) => r.endsWith("-tuning"))!;
 const scores = (id: string) => JSON.parse(readFileSync(`${root}/${id}/scores.json`, "utf8"));
 
 test("shows the newest holdout run by default, one card per variant", async ({ page }) => {
-  await page.goto("/");
+  await page.goto("/results");
   await expect(page.getByLabel("Run", { exact: true })).toHaveValue(holdout);
   for (const v of scores(holdout).variants) {
     await expect(page.getByTestId(`acc-${v.variant}`)).toHaveText(v.accuracy.toFixed(3));
@@ -16,7 +16,7 @@ test("shows the newest holdout run by default, one card per variant", async ({ p
 });
 
 test("picking another run reloads with its numbers", async ({ page }) => {
-  await page.goto("/");
+  await page.goto("/results");
   await page.getByLabel("Run", { exact: true }).selectOption(tuning);
   await expect(page).toHaveURL(new RegExp(`run=${tuning}`));
   const v = scores(tuning).variants[0];
@@ -24,12 +24,12 @@ test("picking another run reloads with its numbers", async ({ page }) => {
 });
 
 test("an unknown run id falls back to the default run", async ({ page }) => {
-  await page.goto("/?run=does-not-exist");
+  await page.goto("/results?run=does-not-exist");
   await expect(page.getByLabel("Run", { exact: true })).toHaveValue(holdout);
 });
 
 test("the metric switch shows the priority family", async ({ page }) => {
-  await page.goto("/");
+  await page.goto("/results");
   await expect(page.getByTestId("contrast-H1")).toBeVisible();
   await page.getByRole("link", { name: "Priority (secondary)" }).click();
   await expect(page).toHaveURL(/metric=priority/);
@@ -38,7 +38,7 @@ test("the metric switch shows the priority family", async ({ page }) => {
 });
 
 test("a confusion-matrix cell links to its tickets", async ({ page }) => {
-  await page.goto("/");
+  await page.goto("/results");
   const cell = page.getByRole("link", { name: /tickets with gold/ }).first();
   await expect(cell).toHaveAttribute("href", /^\/cases\?run=.+&variant=.+&gold=.+&pred=.+$/);
 });
