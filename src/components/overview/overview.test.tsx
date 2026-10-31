@@ -4,6 +4,7 @@ import type { RunSummary } from "@/core/artifacts/runs";
 import type { PromptSummary } from "@/core/views/overview";
 import { PromptCards } from "./PromptCards";
 import { RunChips, shortModel } from "./RunChips";
+import { VerdictStrip } from "./VerdictStrip";
 
 const run = (id: string, model: string, split: "holdout" | "tuning" = "holdout", created = "2026-10-30T12:00:00Z"): RunSummary => ({ id, label: id, split, created, n: 138, model });
 
@@ -52,5 +53,29 @@ describe("PromptCards", () => {
     render(<PromptCards prompts={[p("zero-json", 0.855)]} runId="r1" />);
     expect(screen.getByRole("img", { name: "zero-json accuracy by ticket type: clear 90%, ambig. 80%, inject. 70%, noisy 0%" })).toBeInTheDocument();
     expect(screen.getByTestId("prompt-zero-json")).toHaveTextContent("6/20");
+  });
+});
+
+describe("VerdictStrip", () => {
+  const largest = {
+    id: "H1", metric: "category" as const, a: "zero-json", b: "few-json", question: "q", n_pairs: 138,
+    counts: { both_right: 115, both_wrong: 10, a_only: 3, b_only: 10 }, p: 0.092, p_holm: 0.369,
+    accuracy_diff: { point: 0.0507, lo: 0, hi: 0.1 },
+  };
+  test("not shown: says so with the largest gap, Holm p and detectable gap", () => {
+    render(<VerdictStrip verdict={{ anyShown: false, largest }} comparisons={4} detectable={0.13} preregistered runId="r" />);
+    const strip = screen.getByRole("region", { name: "Verdict" });
+    expect(strip).toHaveTextContent("No prompt wins clearly.");
+    expect(strip).toHaveTextContent("Largest gap +5.1 points (few-json vs zero-json). After correcting for 4 comparisons, p = 0.369. The test could detect about 13 points.");
+    expect(strip).toHaveTextContent("Pre-registered");
+    expect(strip).toHaveTextContent("No significant difference");
+  });
+  test("shown: the headline and pill change", () => {
+    render(<VerdictStrip verdict={{ anyShown: true, largest: { ...largest, p_holm: 0.01 } }} comparisons={4} detectable={null} preregistered={false} runId="r" />);
+    const strip = screen.getByRole("region", { name: "Verdict" });
+    expect(strip).toHaveTextContent("One prompt wins on this run.");
+    expect(strip).toHaveTextContent("Significant difference");
+    expect(strip).not.toHaveTextContent("Pre-registered");
+    expect(strip).not.toHaveTextContent("could detect");
   });
 });
