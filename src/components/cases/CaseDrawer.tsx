@@ -34,16 +34,17 @@ export function CaseDrawer({ title, closeHref, ticketId, children }: { title: st
         close();
       }}
       onClick={(e) => e.target === ref.current && close()}
-      className="ml-auto mr-0 h-full max-h-none w-full max-w-2xl bg-surface p-0 text-ink shadow-card backdrop:bg-ink/40"
+      className="ml-auto mr-0 h-full max-h-none w-full max-w-2xl border-l border-line bg-surface/95 p-0 text-ink shadow-card backdrop-blur-xl backdrop:bg-canvas/60 backdrop:backdrop-blur-sm md:rounded-l-3xl"
     >
       <div className="flex h-full flex-col">
-        <header className="flex items-center justify-between border-b border-line px-5 py-3">
-          <h2 className="font-mono font-semibold">{title}</h2>
-          <button type="button" onClick={close} aria-label="Close" className="grid size-9 place-items-center rounded-lg border border-line">
+        <header className="flex items-center justify-between border-b border-line px-6 py-4">
+          <h2 className="font-mono text-lg">{title}</h2>
+          <button type="button" onClick={close} aria-label="Close" className="grid size-9 place-items-center rounded-full border border-line hover:bg-surface-2">
             <X className="size-4" aria-hidden />
           </button>
         </header>
-        <div className="flex-1 space-y-5 overflow-y-auto px-5 py-4 text-sm">{children}</div>
+        {/* Focusable so keyboard users can scroll it when it overflows. */}
+        <div tabIndex={0} className="flex-1 space-y-6 overflow-y-auto px-6 py-5 text-sm focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-brand">{children}</div>
       </div>
     </dialog>
   );
