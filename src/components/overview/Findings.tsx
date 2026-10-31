@@ -25,7 +25,7 @@ function Incident({ badge, badgeTone, status, statusTone, title, sub, stats, cha
       </div>
       <h3 className="mt-4 text-lg font-medium">{title}</h3>
       {sub && <p className="mt-1 font-mono text-xs text-muted">{sub}</p>}
-      <dl className="mt-4 grid grid-cols-3 gap-3">
+      <dl className={`mt-4 grid gap-3 ${stats.length === 2 ? "grid-cols-2" : "grid-cols-3"}`}>
         {stats.map(([k, v]) => (
           <div key={k} className="min-w-0">
             <dt className="micro">{k}</dt>
@@ -108,8 +108,7 @@ export function Findings({ o, runId, detectable }: { o: Overview; runId: string;
           sub={w.topGold && w.topAnswer ? `mostly ${w.topGold.label}, answered ${w.topAnswer.label}` : undefined}
           stats={[
             ["Always wrong", String(w.count)],
-            ["Top gold", w.topGold ? `${w.topGold.label} (${w.topGold.count})` : "—"],
-            ["Top answer", w.topAnswer ? w.topAnswer.label : "—"],
+            ["Top gold label", w.topGold ? `${w.topGold.label} (${w.topGold.count})` : "—"],
           ]}
           href={casesHref({ run: runId, allwrong: true })}
         />

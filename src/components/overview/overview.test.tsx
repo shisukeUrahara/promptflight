@@ -53,7 +53,7 @@ describe("PromptCards", () => {
   });
   test("the per-type chart lists every type, a missing type as 0%", () => {
     render(<PromptCards prompts={[p("zero-json", 0.855)]} runId="r1" />);
-    expect(screen.getByRole("img", { name: "zero-json accuracy by ticket type: clear 90%, ambig. 80%, inject. 70%, noisy 0%" })).toBeInTheDocument();
+    expect(screen.getByRole("img", { name: "zero-json accuracy by ticket type: clear 90, ambig. 80, inject. 70, noisy 0" })).toBeInTheDocument();
     expect(screen.getByTestId("prompt-zero-json")).toHaveTextContent("6/20");
   });
 });

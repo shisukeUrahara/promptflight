@@ -38,7 +38,8 @@ export function PromptCards({ prompts, runId }: { prompts: PromptSummary[]; runI
                 values={(Object.keys(SLICE_LABEL) as (keyof typeof SLICE_LABEL)[]).map((s) => ({ label: SLICE_LABEL[s], value: p.bySlice[s] ?? 0 }))}
                 max={1}
                 barClass={`${variantMeta(p.name).bar} opacity-80`}
-                format={(v) => `${Math.round(v * 100)}%`}
+                format={(v) => `${Math.round(v * 100)}`}
+                showValues
               />
             </span>
             <span className="mt-5 flex items-center justify-between border-t border-line pt-4 font-mono text-xs text-muted">

@@ -70,12 +70,17 @@ export function SplitBar({ a, b, aLabel, bLabel, aClass, bClass }: { a: number; 
 }
 
 /** A few vertical bars with labels under them, e.g. accuracy per ticket type. Values 0..max. */
-export function MiniBars({ values, max, label, barClass, format = (v) => String(v) }: { values: { label: string; value: number }[]; max: number; label: string; barClass: string; format?: (v: number) => string }) {
+export function MiniBars({ values, max, label, barClass, format = (v) => String(v), showValues = false }: { values: { label: string; value: number }[]; max: number; label: string; barClass: string; format?: (v: number) => string; showValues?: boolean }) {
   return (
     <figure role="img" aria-label={`${label}: ${values.map((v) => `${v.label} ${format(v.value)}`).join(", ")}`} className="m-0">
       <div className="flex h-16 items-end gap-1.5">
         {values.map((v) => (
           <span key={v.label} className="flex h-full flex-1 flex-col justify-end">
+            {showValues && (
+              <span aria-hidden className="mb-1 text-center font-mono text-[11px] text-ink">
+                {format(v.value)}
+              </span>
+            )}
             <span className={`block w-full rounded-t-md ${barClass}`} style={{ height: `${max === 0 ? 0 : Math.max(4, (v.value / max) * 100)}%` }} />
           </span>
         ))}

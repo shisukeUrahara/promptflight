@@ -8,6 +8,7 @@ import { VerdictStrip } from "@/components/overview/VerdictStrip";
 import { DEFAULT_SETUP, minDetectableEffect } from "@/core/metrics/power";
 import { RunChips, shortModel } from "@/components/overview/RunChips";
 import { Empty } from "@/components/StateViews";
+import { StatTile } from "@/components/ui/StatTile";
 import { overviewStats } from "@/core/views/overview";
 import { getCases, getRun, getRuns, pickRun } from "./data";
 
@@ -44,6 +45,12 @@ export default async function Page(props: PageProps<"/">) {
       />
       <FlowDiagram tickets={cases.length} prompts={o.prompts.map((p) => p.name)} model={shortModel(run.manifest.model)} />
       <Findings o={o} runId={current.id} detectable={detectable} />
+      <section aria-label="Facts" className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <StatTile value={`${Math.round(o.validity * 100)}%`} label="valid answers" />
+        <StatTile value={`${o.injection.min}–${o.injection.max} of ${o.injection.n}`} label="hidden instructions obeyed" tone={o.injection.max > 0 ? "danger" : "ink"} />
+        <StatTile value={`${Math.round(o.promptTokens.min).toLocaleString("en-US")} → ${Math.round(o.promptTokens.max).toLocaleString("en-US")}`} label="prompt tokens per ticket" />
+        <StatTile value={`$${o.runCostUsd.toFixed(2)}`} label="cost of this run" />
+      </section>
     </div>
   );
 }
