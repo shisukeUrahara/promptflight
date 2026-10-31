@@ -11,6 +11,7 @@ import { ManifestStrip } from "@/components/report/ManifestStrip";
 import { RunPicker } from "@/components/report/RunPicker";
 import { SliceChart } from "@/components/report/SliceChart";
 import { RunChips } from "@/components/overview/RunChips";
+import { variantMeta } from "@/components/Variant";
 import { accuracyBySlice } from "@/core/metrics/slices";
 import { getCases, getRun, getRuns, pickRun } from "../data";
 
@@ -92,8 +93,9 @@ function Report({ id, metric, variant }: { id: string; metric: "category" | "pri
                 key={v.variant}
                 href={`/results?run=${id}${metric === "priority" ? "&metric=priority" : ""}&variant=${v.variant}`}
                 aria-current={v.variant === shown.variant ? "true" : undefined}
-                className="rounded-full border border-line px-3 py-1 text-xs aria-[current=true]:bg-surface-2 aria-[current=true]:font-medium"
+                className="inline-flex items-center gap-1.5 rounded-full border border-line px-3 py-1 font-mono text-xs text-muted hover:text-ink aria-[current=true]:border-brand/40 aria-[current=true]:bg-brand-bg aria-[current=true]:text-ink"
               >
+                <span aria-hidden className={`size-2 rounded-full ${variantMeta(v.variant).dot}`} />
                 {v.variant}
               </Link>
             ))}

@@ -19,11 +19,11 @@ const SHORT: Record<string, string> = {
 export function ConfusionMatrix({ confusion, runId, variant }: { confusion: Confusion; runId: string; variant: string }) {
   return (
     <div className="overflow-x-auto">
-      <table className="min-w-[640px] border-collapse text-xs">
+      <table className="min-w-[640px] border-separate border-spacing-1 text-xs">
         <caption className="sr-only">Confusion matrix for {variant}: rows are the gold category, columns the answer</caption>
         <thead>
           <tr>
-            <th scope="col" className="p-1 text-left font-normal text-muted">
+            <th scope="col" className="micro p-1 text-left font-normal">
               gold ↓ / answer →
             </th>
             {confusion.columns.map((c) => (
@@ -40,23 +40,30 @@ export function ConfusionMatrix({ confusion, runId, variant }: { confusion: Conf
             const total = confusion.matrix[r].reduce((a, b) => a + b, 0);
             return (
               <tr key={gold}>
-                <th scope="row" className="p-1 text-left font-mono font-normal">
+                <th scope="row" className="pr-2 text-left font-mono font-normal text-muted">
                   {gold}
                 </th>
                 {confusion.matrix[r].map((n, c) => {
                   const pred = confusion.columns[c];
                   const right = pred === gold;
                   const share = total === 0 ? 0 : n / total;
-                  const style = n === 0 ? undefined : { backgroundColor: `color-mix(in srgb, var(${right ? "--success" : "--danger"}) ${Math.round(12 + share * 50)}%, transparent)` };
+                  const tone = right ? "--success" : "--danger";
+                  const style =
+                    n === 0
+                      ? undefined
+                      : {
+                          backgroundColor: `color-mix(in srgb, var(${tone}) ${Math.round(14 + share * 56)}%, transparent)`,
+                          boxShadow: right && share >= 0.5 ? `0 0 18px -4px color-mix(in srgb, var(${tone}) 60%, transparent)` : undefined,
+                        };
                   return (
-                    <td key={pred} className="p-0.5 text-center font-mono">
+                    <td key={pred} className="p-0 text-center font-mono">
                       {n === 0 ? (
-                        <span className="block rounded px-2 py-1.5 text-muted/50">·</span>
+                        <span className="block rounded-lg bg-surface-2/60 px-2 py-2 text-muted/40">·</span>
                       ) : (
                         <Link
                           href={casesHref({ run: runId, variant, gold, pred })}
                           style={style}
-                          className="block rounded px-2 py-1.5 hover:outline hover:outline-1 hover:outline-ink"
+                          className="num block rounded-lg px-2 py-2 font-medium transition-transform hover:scale-105 hover:outline hover:outline-1 hover:outline-ink"
                           aria-label={`${n} tickets with gold ${gold} answered ${pred}`}
                         >
                           {n}
