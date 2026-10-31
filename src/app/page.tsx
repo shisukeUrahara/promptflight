@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
 import { connection } from "next/server";
+import { FlowDiagram } from "@/components/overview/FlowDiagram";
 import { Hero } from "@/components/overview/Hero";
 import { PromptCards } from "@/components/overview/PromptCards";
 import { VerdictStrip } from "@/components/overview/VerdictStrip";
 import { DEFAULT_SETUP, minDetectableEffect } from "@/core/metrics/power";
-import { RunChips } from "@/components/overview/RunChips";
+import { RunChips, shortModel } from "@/components/overview/RunChips";
 import { Empty } from "@/components/StateViews";
 import { overviewStats } from "@/core/views/overview";
 import { getCases, getRun, getRuns, pickRun } from "./data";
@@ -25,7 +26,8 @@ export default async function Page(props: PageProps<"/">) {
     );
   }
   const run = getRun(current.id);
-  const o = overviewStats(run.scores, run.results, getCases());
+  const cases = getCases();
+  const o = overviewStats(run.scores, run.results, cases);
 
   return (
     <div className="space-y-16">
@@ -38,6 +40,7 @@ export default async function Page(props: PageProps<"/">) {
         preregistered={run.manifest.preregistration_sha !== null}
         runId={current.id}
       />
+      <FlowDiagram tickets={cases.length} prompts={o.prompts.map((p) => p.name)} model={shortModel(run.manifest.model)} />
     </div>
   );
 }

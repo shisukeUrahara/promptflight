@@ -2,6 +2,7 @@ import { render, screen } from "@testing-library/react";
 import { describe, expect, test } from "vitest";
 import type { RunSummary } from "@/core/artifacts/runs";
 import type { PromptSummary } from "@/core/views/overview";
+import { FlowDiagram } from "./FlowDiagram";
 import { PromptCards } from "./PromptCards";
 import { RunChips, shortModel } from "./RunChips";
 import { VerdictStrip } from "./VerdictStrip";
@@ -77,5 +78,13 @@ describe("VerdictStrip", () => {
     expect(strip).toHaveTextContent("Significant difference");
     expect(strip).not.toHaveTextContent("Pre-registered");
     expect(strip).not.toHaveTextContent("could detect");
+  });
+});
+
+describe("FlowDiagram", () => {
+  test("lists the steps in order with the real counts and model", () => {
+    render(<FlowDiagram tickets={204} prompts={["zero-json", "few-json"]} model="gpt-4o-mini" />);
+    const region = screen.getByRole("region", { name: "How it works" });
+    expect(region).toHaveTextContent(/204 tickets.*labeled blind.*2 prompts:.*zero-json.*few-json.*gpt-4o-mini.*Checker.*schema \+ label.*Scores/);
   });
 });
