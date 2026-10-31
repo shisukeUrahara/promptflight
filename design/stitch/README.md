@@ -55,3 +55,20 @@ The first UI read as generic. v2 is redesigned from three references the owner p
 | zero-json / zero-strict / few-json / few-strict | `#f5a524` / `#38bdf8` / `#2dd4bf` / `#a78bfa` | same fills; ink `#8a5300` / `#0369a1` / `#0f766e` / `#5b3fd6` |
 
 Radius 20px for cards, 12px inside. Display numbers in Geist Light with tabular numerals; 11px uppercase micro labels; Inter body; JetBrains Mono for ids.
+
+## Approved v2 screens (31 Oct 2026)
+The owner compared two concepts and chose a mix: concept B on top (centered light headline, one card per prompt, verdict strip) and concept A below (flow diagram, three "What we found" incident cards).
+
+| Screen | Dark | Light |
+|---|---|---|
+| Overview | `47597c004cea4da9a5f70c8fc45b0e5c` | `dd32dcd07ac64b49b0dd6247d2028e3c` |
+| Results | `88afdc4a5e7c41478b5ceb13e23b5bb6` | `5f8720acea244f94b2a85f561d54f1f9` |
+| Tickets | `474bca83e9934306a96f98e11578718b` | `62e4c45998bb439584e43bc91e7ef0a7` |
+| Prompts | `d3e529a2723c4493b60ac0cf85ff2153` | `91cda7c6a03a4d35bd983de022a9fa46` |
+| Phone Overview / Results | `7605d88270a14282b38e4556f3ada886` / `ed2416ee5e324b7dba17c626225fe135` | — |
+
+Concepts: A `ed84e34ab401465fa9caa32d59db82e7`, B `a2131aabec0c4f259e955193a6f9f7bb`.
+
+**Copy rule.** Every prompt to Stitch carried the exact text and numbers, and forbade avatars, dates and claims. Where Stitch still invented something (a footnote, a "live" tag, red/green split bars, made-up card numbers on the first light Results), the build uses only the run files: split bars use each prompt's own color, and the per-type charts are bars of real accuracy on clear / ambiguous / injection / noisy tickets.
+
+The model `GEMINI_3_5_FLASH_LITE` was used; the default model timed out.
