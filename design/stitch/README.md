@@ -26,3 +26,32 @@ To export images: open the project in Stitch, select a screen, Export.
 
 ## Not taken from the designs
 Profile avatars, settings buttons, "confidence" fields and invented categories in the sample rows: PromptFlight has no accounts and the model returns no confidence.
+
+---
+
+# v2: "Afterglow Ops" (31 Oct 2026)
+
+The first UI read as generic. v2 is redesigned from three references the owner picked:
+1. a dark "Production Command" ops dashboard (huge hero number, status pills, health bars, incident cards, mobile bottom tabs);
+2. an "AI Assistant" dashboard (left sidebar, top search, glass cards over a violet-blue glow, donut rings, small area charts);
+3. "Aura AI Afterglow" (violet glow, light-weight display type, pill chips, thin-bordered rounded cards).
+
+## Design systems
+| Theme | Stitch asset |
+|---|---|
+| Dark | `assets/18202162895111375579` |
+| Light | `assets/1966164970992536036` |
+
+## Tokens
+| Token | Dark | Light |
+|---|---|---|
+| canvas | `#0a0b14` + violet glow 18%, blue glow 10% | `#f5f5fb` + the same glows at 8% |
+| card | white 4%, 1px white 8% border, blur 16px | `#ffffff`, 1px `#e6e6f0`, soft shadow |
+| text / muted | `#eef0f8` / `#9aa1b5` | `#12131c` / `#5d6275` |
+| good (shown, clean) | teal `#2dd4bf` | ink `#0f766e` on `#e6f7f4` |
+| bad | coral `#f87171` | ink `#b4232a` on `#fde8e8` |
+| warning | amber `#fbbf24` | ink `#8a5300` on `#fdf3dc` |
+| brand (pre-registered) | violet `#a78bfa` | ink `#5b3fd6` on `#efebff` |
+| zero-json / zero-strict / few-json / few-strict | `#f5a524` / `#38bdf8` / `#2dd4bf` / `#a78bfa` | same fills; ink `#8a5300` / `#0369a1` / `#0f766e` / `#5b3fd6` |
+
+Radius 20px for cards, 12px inside. Display numbers in Geist Light with tabular numerals; 11px uppercase micro labels; Inter body; JetBrains Mono for ids.
