@@ -1,63 +1,89 @@
 import Link from "next/link";
 import type { ContrastReport } from "@/core/artifacts/scores";
-import { ci, fmt, signed } from "../format";
-import { VariantName } from "../Variant";
+import { casesHref } from "@/core/views/query";
+import { fmt } from "../format";
+import { SplitBar } from "../ui/charts";
+import { Pill } from "../ui/Pill";
+import { variantMeta } from "../Variant";
 
 export const SIGNIFICANT = 0.05;
 
-/** Metric switch: plain links, so it works without JavaScript and the state is in the URL. */
+/** Category / priority switch as a segmented pill. Plain links, so the state lives in the URL. */
 export function MetricSwitch({ runId, metric }: { runId: string; metric: "category" | "priority" }) {
   const item = (m: "category" | "priority", label: string) => (
     <Link
       href={`/results?run=${runId}${m === "priority" ? "&metric=priority" : ""}`}
       aria-current={metric === m ? "true" : undefined}
-      className="rounded-md px-3 py-1.5 text-sm text-muted aria-[current=true]:bg-surface aria-[current=true]:font-medium aria-[current=true]:text-ink aria-[current=true]:shadow-card"
+      className="rounded-full px-4 py-1.5 text-sm text-muted transition-colors hover:text-ink aria-[current=true]:bg-surface-2 aria-[current=true]:font-medium aria-[current=true]:text-ink aria-[current=true]:shadow-card"
     >
       {label}
     </Link>
   );
   return (
-    <nav aria-label="Metric" className="inline-flex rounded-lg border border-line bg-surface-2 p-0.5">
-      {item("category", "Category (primary)")}
-      {item("priority", "Priority (secondary)")}
+    <nav aria-label="Metric" className="inline-flex rounded-full border border-line bg-surface/70 p-1">
+      {item("category", "Category · primary")}
+      {item("priority", "Priority · secondary")}
     </nav>
   );
 }
 
-export function ContrastGrid({ contrasts }: { contrasts: ContrastReport[] }) {
+const pts = (v: number) => `${v >= 0 ? "+" : "−"}${Math.abs(v * 100).toFixed(1)} pts`;
+
+/** The pre-registered comparisons as incident cards: id, verdict, three numbers, the paired split. */
+export function ContrastGrid({ contrasts, runId }: { contrasts: ContrastReport[]; runId: string }) {
   if (contrasts.length === 0) return <p className="text-sm text-muted">This run does not have both variants of any comparison.</p>;
   return (
-    <ul aria-label="Comparisons" className="grid gap-3 sm:grid-cols-2">
-      {contrasts.map((c) => {
+    <ul aria-label="Comparisons" className="grid gap-4 md:grid-cols-2">
+      {contrasts.map((c, i) => {
         const shown = c.p_holm < SIGNIFICANT;
+        const d = c.accuracy_diff.point;
         return (
-          <li key={c.id} className="min-w-0 rounded-lg border border-line p-4" data-testid={`contrast-${c.id}`}>
-            <div className="flex items-start justify-between gap-2">
-              <p className="font-mono text-xs text-muted">{c.id}</p>
-              <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${shown ? "bg-success-bg text-success" : "bg-surface-2 text-muted"}`}>
-                {shown ? "shown" : "not shown"}
-              </span>
+          <li
+            key={c.id}
+            data-testid={`contrast-${c.id}`}
+            className="fade-up flex min-w-0 flex-col rounded-3xl border border-line bg-surface/85 p-5 shadow-card backdrop-blur-xl md:p-6"
+            style={{ ["--delay" as string]: `${i * 50}ms` }}
+          >
+            <div className="flex items-start justify-between gap-3">
+              <div className="flex min-w-0 items-center gap-2">
+                <Pill mono>{c.id}</Pill>
+                <span className="truncate font-mono text-sm">
+                  {c.b} vs {c.a}
+                </span>
+              </div>
+              <Pill tone={shown ? "success" : "neutral"}>{shown ? "Shown" : "Not shown"}</Pill>
             </div>
-            <p className="mt-1 flex flex-wrap items-center gap-x-2 text-sm">
-              <VariantName name={c.b} /> <span className="text-muted">vs</span> <VariantName name={c.a} />
-            </p>
-            <p className="mt-0.5 text-xs text-muted">{c.question}</p>
-            <p className="mt-3 font-mono text-xl font-semibold">{signed(c.accuracy_diff.point)}</p>
-            <p className="font-mono text-xs text-muted">{ci(c.accuracy_diff)} 95% CI, {c.metric} accuracy</p>
-            <dl className="mt-3 grid grid-cols-2 gap-x-3 gap-y-1 text-sm">
-              <dt className="text-muted">Only {c.a} right</dt>
-              <dd className="text-right font-mono">{c.counts.a_only}</dd>
-              <dt className="text-muted">Only {c.b} right</dt>
-              <dd className="text-right font-mono">{c.counts.b_only}</dd>
-              <dt className="text-muted">Both right / both wrong</dt>
-              <dd className="text-right font-mono">
-                {c.counts.both_right} / {c.counts.both_wrong}
-              </dd>
-              <dt className="text-muted">p (exact McNemar)</dt>
-              <dd className="text-right font-mono">{fmt(c.p)}</dd>
-              <dt className="text-muted">p after Holm</dt>
-              <dd className="text-right font-mono">{fmt(c.p_holm)}</dd>
+            <p className="mt-2 text-sm text-muted">{c.question}</p>
+            <dl className="mt-5 grid grid-cols-3 gap-3 border-y border-line py-4">
+              <div>
+                <dt className="micro">Difference</dt>
+                <dd className={`num mt-1 font-mono text-lg ${d > 0 ? "text-success" : d < 0 ? "text-danger" : ""}`}>{pts(d)}</dd>
+              </div>
+              <div>
+                <dt className="micro">p (McNemar)</dt>
+                <dd className="num mt-1 font-mono text-lg">{fmt(c.p)}</dd>
+              </div>
+              <div>
+                <dt className="micro">After Holm</dt>
+                <dd className="num mt-1 font-mono text-lg">{fmt(c.p_holm)}</dd>
+              </div>
             </dl>
+            <div className="mt-4">
+              <SplitBar
+                a={c.counts.a_only}
+                b={c.counts.b_only}
+                aLabel={`only ${c.a}`}
+                bLabel={`only ${c.b}`}
+                aClass={variantMeta(c.a).bar}
+                bClass={variantMeta(c.b).bar}
+              />
+              <p className="mt-2 font-mono text-xs text-muted">
+                both right {c.counts.both_right} · both wrong {c.counts.both_wrong} · 95% CI {pts(c.accuracy_diff.lo)} to {pts(c.accuracy_diff.hi)}
+              </p>
+            </div>
+            <Link href={casesHref({ run: runId, disagree: true })} className="mt-auto pt-4 text-sm text-brand underline-offset-2 hover:underline">
+              View tickets ›
+            </Link>
           </li>
         );
       })}

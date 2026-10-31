@@ -31,7 +31,7 @@ test("an unknown run id falls back to the default run", async ({ page }) => {
 test("the metric switch shows the priority family", async ({ page }) => {
   await page.goto("/results");
   await expect(page.getByTestId("contrast-H1")).toBeVisible();
-  await page.getByRole("link", { name: "Priority (secondary)" }).click();
+  await page.getByRole("link", { name: "Priority · secondary" }).click();
   await expect(page).toHaveURL(/metric=priority/);
   await expect(page.getByTestId("contrast-H5")).toBeVisible();
   await expect(page.getByTestId("contrast-H1")).toHaveCount(0);

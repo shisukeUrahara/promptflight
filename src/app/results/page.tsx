@@ -76,7 +76,7 @@ function Report({ id, metric, variant }: { id: string; metric: "category" | "pri
         <div className="mb-4">
           <MetricSwitch runId={id} metric={metric} />
         </div>
-        <ContrastGrid contrasts={contrasts} />
+        <ContrastGrid contrasts={contrasts} runId={id} />
       </Card>
       <div className="grid gap-6 xl:grid-cols-[3fr_2fr]">
         <Card title="Confusion matrix" hint="Rows are the gold category, columns the answer. Select a cell to see its tickets.">

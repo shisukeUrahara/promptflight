@@ -58,21 +58,22 @@ describe("ManifestStrip", () => {
 describe("ContrastGrid", () => {
   const base = scores.contrasts[0];
   test("one tile per contrast with its paired counts", () => {
-    render(<ContrastGrid contrasts={scores.contrasts.filter((c) => c.metric === "category")} />);
+    render(<ContrastGrid contrasts={scores.contrasts.filter((c) => c.metric === "category")} runId="r" />);
     for (const c of scores.contrasts.filter((c) => c.metric === "category")) {
       const tile = screen.getByTestId(`contrast-${c.id}`);
-      expect(tile).toHaveTextContent(`Only ${c.a} right${c.counts.a_only}`);
-      expect(tile).toHaveTextContent(`Only ${c.b} right${c.counts.b_only}`);
+      expect(tile).toHaveTextContent(`only ${c.a} ${c.counts.a_only}`);
+      expect(tile).toHaveTextContent(`only ${c.b} ${c.counts.b_only}`);
+      expect(tile).toHaveTextContent(`both right ${c.counts.both_right}`);
     }
   });
   test("'shown' only when the Holm p is below 0.05", () => {
-    render(<ContrastGrid contrasts={[{ ...base, id: "X1", p_holm: 0.049 }, { ...base, id: "X2", p_holm: 0.05 }]} />);
-    expect(screen.getByTestId("contrast-X1")).toHaveTextContent("shown");
-    expect(screen.getByTestId("contrast-X1")).not.toHaveTextContent("not shown");
-    expect(screen.getByTestId("contrast-X2")).toHaveTextContent("not shown");
+    render(<ContrastGrid contrasts={[{ ...base, id: "X1", p_holm: 0.049 }, { ...base, id: "X2", p_holm: 0.05 }]} runId="r" />);
+    expect(screen.getByTestId("contrast-X1")).toHaveTextContent("Shown");
+    expect(screen.getByTestId("contrast-X1")).not.toHaveTextContent("Not shown");
+    expect(screen.getByTestId("contrast-X2")).toHaveTextContent("Not shown");
   });
   test("says so when no comparison can be made", () => {
-    render(<ContrastGrid contrasts={[]} />);
+    render(<ContrastGrid contrasts={[]} runId="r" />);
     expect(screen.getByText(/does not have both variants/)).toBeInTheDocument();
   });
 });
