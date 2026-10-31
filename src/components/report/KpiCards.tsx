@@ -38,7 +38,7 @@ export function KpiCards({ variants, runId }: { variants: VariantReport[]; runId
             <dt className="text-muted">Per 100 tickets</dt>
             <dd className="text-right font-mono">{usd(v.cost_per_100_usd)}</dd>
           </dl>
-          <Link href={casesHref({ run: runId, variant: v.variant })} className="mt-3 inline-block text-sm text-primary underline-offset-2 hover:underline">
+          <Link href={casesHref({ run: runId, variant: v.variant })} className="mt-3 inline-block text-sm text-brand underline-offset-2 hover:underline">
             See its tickets
           </Link>
         </li>

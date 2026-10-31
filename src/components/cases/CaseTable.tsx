@@ -31,7 +31,7 @@ export function CaseTable({ rows, variants, rowHref }: { rows: CaseRow[]; varian
           {rows.map((r) => (
             <tr key={r.case_id} className="border-b border-line align-top hover:bg-surface-2/60">
               <th scope="row" className="py-2 pr-3 text-left font-normal">
-                <Link id={`row-${r.case_id}`} href={rowHref(r.case_id)} scroll={false} className="font-mono text-primary underline-offset-2 hover:underline">
+                <Link id={`row-${r.case_id}`} href={rowHref(r.case_id)} scroll={false} className="font-mono text-brand underline-offset-2 hover:underline">
                   {r.case_id}
                 </Link>
                 <span className="mt-0.5 block text-xs text-muted">{r.slice.replace("_pair", "")}</span>

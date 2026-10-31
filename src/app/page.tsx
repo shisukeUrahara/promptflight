@@ -29,7 +29,7 @@ export default async function Page(props: PageProps<"/">) {
         {current && (
           <div className="flex min-w-0 flex-col gap-2 sm:flex-row sm:items-center lg:max-w-xl">
             <RunPicker runs={runs} current={current.id} />
-            <a href={`/runs/${current.id}/manifest`} className="shrink-0 text-sm text-primary underline-offset-2 hover:underline">
+            <a href={`/runs/${current.id}/manifest`} className="shrink-0 text-sm text-brand underline-offset-2 hover:underline">
               Download manifest
             </a>
           </div>

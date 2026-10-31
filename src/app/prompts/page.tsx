@@ -49,7 +49,7 @@ export default async function Page(props: PageProps<"/prompts">) {
                           <Link
                             href={`/prompts?name=${n}&id=${v.id}`}
                             aria-current={n === name && v.id === selected.id ? "true" : undefined}
-                            className="font-mono text-primary underline-offset-2 hover:underline aria-[current=true]:font-semibold"
+                            className="font-mono text-brand underline-offset-2 hover:underline aria-[current=true]:font-semibold"
                           >
                             {v.id}
                           </Link>

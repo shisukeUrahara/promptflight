@@ -66,7 +66,7 @@ function DatasetPanel({ count }: { count: number }) {
         )}
         <p>
           Rules for close calls:{" "}
-          <a className="text-primary underline" href="https://github.com/shisukeUrahara/promptflight/blob/main/docs/labeling_guide.md">
+          <a className="text-brand underline" href="https://github.com/shisukeUrahara/promptflight/blob/main/docs/labeling_guide.md">
             labeling guide
           </a>
           .

@@ -65,7 +65,7 @@ export function FailureTable({ variants, runId }: { variants: VariantReport[]; r
                     {n === 0 ? (
                       <span className="text-muted">0</span>
                     ) : (
-                      <Link className="text-primary underline" href={casesHref({ run: runId, variant: v.variant, failure: code })}>
+                      <Link className="text-brand underline" href={casesHref({ run: runId, variant: v.variant, failure: code })}>
                         {n}
                       </Link>
                     )}

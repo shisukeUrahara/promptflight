@@ -2,59 +2,68 @@
 
 @custom-variant dark (&:where(.dark, .dark *));
 
-/* PromptFlight design tokens. Neutrals and status colors follow SearchLab; the four
-   variant colors are new. Each variant has a fill (bars, dots) and an -ink tone for text. */
+/* PromptFlight v2 "Afterglow" tokens (design/stitch/README.md). Light first, dark under .dark.
+   Text tokens are checked for 4.5:1 contrast on their backgrounds by src/app/tokens.test.ts. */
 :root {
-  --canvas: #f6f4ef;
+  --canvas: #f5f5fb;
   --surface: #ffffff;
-  --surface-2: #efece5;
-  --ink: #0f1b2d;
-  --muted: #5b6779;
-  --line: #e3ded4;
-  --primary: #2f5bea;
+  --surface-2: #f1f1f8;
+  --ink: #12131c;
+  --muted: #5d6275;
+  --line: #e6e6f0;
+  --primary: #6243e8;
   --primary-ink: #ffffff;
-  --success: #0a7566;
-  --success-bg: #e2f4f0;
-  --warn: #8a5a00;
-  --warn-bg: #fbf0d9;
-  --danger: #a8382f; /* 5.2:1 on --danger-bg; SearchLab's #c2463d was 4.0:1 */
-  --danger-bg: #f9e3e0;
-  --v-zero-json: #e0782e;
-  --v-zero-strict: #3b6ff0;
-  --v-few-json: #11a38b;
-  --v-few-strict: #9b5de5;
-  --v-zero-json-ink: #a14a12;
-  --v-zero-strict-ink: #2649c9;
-  --v-few-json-ink: #0a7566;
-  --v-few-strict-ink: #7a3fc2;
-  --shadow: 0 1px 2px rgb(15 27 45 / 0.04), 0 4px 16px rgb(15 27 45 / 0.04);
+  --brand: #5b3fd6;
+  --brand-bg: #efebff;
+  --success: #0f766e;
+  --success-bg: #e6f7f4;
+  --warn: #8a5300;
+  --warn-bg: #fdf3dc;
+  --danger: #b4232a;
+  --danger-bg: #fde8e8;
+  --v-zero-json: #f5a524;
+  --v-zero-strict: #38bdf8;
+  --v-few-json: #2dd4bf;
+  --v-few-strict: #a78bfa;
+  --v-zero-json-ink: #8a5300;
+  --v-zero-strict-ink: #0369a1;
+  --v-few-json-ink: #0f766e;
+  --v-few-strict-ink: #5b3fd6;
+  --glow-violet: rgb(124 92 255 / 0.1);
+  --glow-blue: rgb(59 130 246 / 0.07);
+  --shadow: 0 1px 2px rgb(20 20 50 / 0.04), 0 8px 24px rgb(20 20 50 / 0.06);
   color-scheme: light;
 }
 
 .dark {
-  --canvas: #0a0f1a;
-  --surface: #111827;
-  --surface-2: #172033;
-  --ink: #e6ebf5;
-  --muted: #93a0b4;
-  --line: #233047;
-  --primary: #6c8cff;
-  --primary-ink: #0a0f1a;
-  --success: #2cc7ae;
-  --success-bg: #0f2e2c;
-  --warn: #e3b14f;
-  --warn-bg: #2e2412;
-  --danger: #f07167;
-  --danger-bg: #331a1a;
-  --v-zero-json: #f0924a;
-  --v-zero-strict: #6c8cff;
-  --v-few-json: #2cc7ae;
-  --v-few-strict: #b88af0;
-  --v-zero-json-ink: #f0924a;
-  --v-zero-strict-ink: #8fa6ff;
-  --v-few-json-ink: #2cc7ae;
-  --v-few-strict-ink: #c4a0ff;
-  --shadow: 0 1px 2px rgb(0 0 0 / 0.3), 0 8px 24px rgb(0 0 0 / 0.25);
+  --canvas: #07080f;
+  /* white 4% over the canvas, as a solid colour so text contrast can be checked */
+  --surface: #111219;
+  --surface-2: #1a1b23;
+  --ink: #eef0f8;
+  --muted: #9aa1b5;
+  --line: #24252e;
+  --primary: #6d4aff;
+  --primary-ink: #ffffff;
+  --brand: #b9a5ff;
+  --brand-bg: #221d3d;
+  --success: #2dd4bf;
+  --success-bg: #0e2a28;
+  --warn: #fbbf24;
+  --warn-bg: #2c2312;
+  --danger: #f87171;
+  --danger-bg: #301717;
+  --v-zero-json: #f5a524;
+  --v-zero-strict: #38bdf8;
+  --v-few-json: #2dd4bf;
+  --v-few-strict: #a78bfa;
+  --v-zero-json-ink: #f5a524;
+  --v-zero-strict-ink: #38bdf8;
+  --v-few-json-ink: #2dd4bf;
+  --v-few-strict-ink: #b9a5ff;
+  --glow-violet: rgb(124 92 255 / 0.22);
+  --glow-blue: rgb(59 130 246 / 0.12);
+  --shadow: 0 1px 0 rgb(255 255 255 / 0.04) inset, 0 12px 32px rgb(0 0 0 / 0.35);
   color-scheme: dark;
 }
 
@@ -73,6 +82,8 @@
   --color-warn-bg: var(--warn-bg);
   --color-danger: var(--danger);
   --color-danger-bg: var(--danger-bg);
+  --color-brand: var(--brand);
+  --color-brand-bg: var(--brand-bg);
   --color-v-zero-json: var(--v-zero-json);
   --color-v-zero-strict: var(--v-zero-strict);
   --color-v-few-json: var(--v-few-json);
