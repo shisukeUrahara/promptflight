@@ -1,2 +1,32 @@
-// The Overview page replaces this in a later commit; until then the home page shows the results.
-export { default } from "./results/page";
+import type { Metadata } from "next";
+import { connection } from "next/server";
+import { Hero } from "@/components/overview/Hero";
+import { RunChips } from "@/components/overview/RunChips";
+import { Empty } from "@/components/StateViews";
+import { overviewStats } from "@/core/views/overview";
+import { getCases, getRun, getRuns, pickRun } from "./data";
+
+export const metadata: Metadata = { title: "Overview" };
+
+export default async function Page(props: PageProps<"/">) {
+  await connection();
+  const sp = await props.searchParams;
+  const runs = getRuns();
+  const current = pickRun(runs, typeof sp.run === "string" ? sp.run : undefined);
+  if (!current) {
+    return (
+      <div className="space-y-6">
+        <h1 className="display text-5xl">PromptFlight</h1>
+        <Empty title="No runs yet" hint="Run: pnpm pf run --split tuning" />
+      </div>
+    );
+  }
+  const run = getRun(current.id);
+  const o = overviewStats(run.scores, run.results, getCases());
+
+  return (
+    <div className="space-y-16">
+      <Hero prompts={o.prompts.length} tickets={o.nCases} chips={<RunChips runs={runs} current={current.id} basePath="/" />} />
+    </div>
+  );
+}

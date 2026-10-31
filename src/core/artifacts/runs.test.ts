@@ -45,8 +45,8 @@ describe("listRuns", () => {
     save("20261029T100000Z-tuning", "2026-10-29T10:00:00.000Z");
     save("20261031T101500Z-holdout", "2026-10-31T10:15:00.000Z", "holdout");
     expect(listRuns(dataDir)).toEqual([
-      { id: "20261031T101500Z-holdout", label: "holdout 20261031T101500Z-holdout", split: "holdout", created: "2026-10-31T10:15:00.000Z", n: 3 },
-      { id: "20261029T100000Z-tuning", label: "tuning 20261029T100000Z-tuning", split: "tuning", created: "2026-10-29T10:00:00.000Z", n: 3 },
+      { id: "20261031T101500Z-holdout", label: "holdout 20261031T101500Z-holdout", split: "holdout", created: "2026-10-31T10:15:00.000Z", n: 3, model: "m" },
+      { id: "20261029T100000Z-tuning", label: "tuning 20261029T100000Z-tuning", split: "tuning", created: "2026-10-29T10:00:00.000Z", n: 3, model: "m" },
     ]);
   });
   test("skips a folder that has no manifest", () => {

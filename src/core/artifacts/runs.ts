@@ -21,6 +21,7 @@ export interface RunSummary {
   split: string;
   created: string;
   n: number;
+  model: string;
 }
 
 const experimentsDir = (dataDir: string) => path.join(dataDir, "experiments");
@@ -34,7 +35,7 @@ export function listRuns(dataDir: string): RunSummary[] {
     .filter((e) => e.isDirectory() && SAFE_ID.test(e.name) && existsSync(path.join(root, e.name, "run_manifest.json")))
     .map((e) => {
       const m = readManifest(path.join(root, e.name));
-      return { id: e.name, label: m.label, split: m.split, created: m.created_at_utc, n: m.sample_count };
+      return { id: e.name, label: m.label, split: m.split, created: m.created_at_utc, n: m.sample_count, model: m.model };
     })
     .sort((a, b) => b.created.localeCompare(a.created) || b.id.localeCompare(a.id));
 }
