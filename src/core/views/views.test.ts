@@ -14,13 +14,18 @@ describe("casesHref", () => {
     expect(casesHref({ variant: "", gold: undefined })).toBe("/cases");
   });
   test("round-trips through parseCasesQuery", () => {
-    const q = { run: "r1", variant: "zero-json", gold: "other", pred: "failed", failure: "invalid_json", slice: "noisy", split: "tuning", disagree: true, allwrong: true } as const;
+    const q = { run: "r1", variant: "zero-json", gold: "other", pred: "failed", failure: "invalid_json", slice: "noisy", split: "tuning", disagree: true, allwrong: true, q: "late refund" } as const;
     const url = new URL(casesHref(q), "http://x");
     expect(parseCasesQuery(Object.fromEntries(url.searchParams))).toEqual(q);
   });
 });
 
 describe("parseCasesQuery", () => {
+  test("q is trimmed, capped at 100 characters, and dropped when empty", () => {
+    expect(parseCasesQuery({ q: "  refund  " })).toEqual({ q: "refund" });
+    expect(parseCasesQuery({ q: "   " })).toEqual({});
+    expect(parseCasesQuery({ q: "x".repeat(150) }).q).toHaveLength(100);
+  });
   test("drops values that are not valid instead of failing", () => {
     expect(parseCasesQuery({ gold: "spam", pred: "nope", failure: "x", slice: "y", split: "fewshot-ish", run: "../etc", variant: "a b", disagree: "yes" })).toEqual({});
   });
@@ -109,6 +114,12 @@ describe("filterRows", () => {
   });
   test("a variant that is not in the run matches nothing", () => {
     expect(ids({ variant: "Z" })).toEqual([]);
+  });
+  test("q matches the ticket id or text, ignoring case", () => {
+    expect(ids({ q: "T-2" })).toEqual(["t-2"]);
+    expect(ids({ q: "TEXT t-3" })).toEqual(["t-3"]);
+    expect(ids({ q: "nothing like this" })).toEqual([]);
+    expect(ids({ q: "text", slice: "noisy" })).toEqual(["t-3"]);
   });
   test("filters combine", () => {
     expect(ids({ gold: "other", disagree: true })).toEqual(["t-4"]);

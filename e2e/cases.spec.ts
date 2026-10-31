@@ -14,6 +14,13 @@ test("lists the default run's tickets, 15 per page", async ({ page }) => {
   await expect(page.getByText(`Showing 16–${Math.min(30, ticketCount)} of ${ticketCount} tickets`)).toBeVisible();
 });
 
+test("search by ticket id finds that one ticket", async ({ page }) => {
+  const id = results[0].case_id;
+  await page.goto(`/cases?q=${id.toUpperCase()}`);
+  await expect(page.getByText(/Showing 1–1 of 1 ticket/)).toBeVisible();
+  await expect(page.getByText(id, { exact: true }).first()).toBeVisible();
+});
+
 test("the disagreement chip filters through the URL", async ({ page }) => {
   await page.goto("/cases");
   await page.getByRole("link", { name: /^Only disagreements/ }).click();

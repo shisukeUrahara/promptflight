@@ -16,9 +16,11 @@ export interface CasesQuery {
   disagree?: boolean;
   /** Only tickets every variant got wrong. */
   allwrong?: boolean;
+  /** Free text: matches the ticket id or its text, ignoring case. */
+  q?: string;
 }
 
-const KEYS = ["run", "variant", "gold", "pred", "failure", "slice", "split"] as const;
+const KEYS = ["run", "variant", "gold", "pred", "failure", "slice", "split", "q"] as const;
 
 /** `/cases?run=...&variant=...`. Empty fields are left out; the key order is fixed. */
 export function casesHref(q: CasesQuery): string {
@@ -57,6 +59,7 @@ export function parseCasesQuery(raw: Record<string, string | string[] | undefine
     split: pick("split", SPLITS),
     disagree: get("disagree") === "1" || undefined,
     allwrong: get("allwrong") === "1" || undefined,
+    q: get("q")?.trim().slice(0, 100) || undefined,
   };
   return Object.fromEntries(Object.entries(q).filter(([, v]) => v !== undefined)) as CasesQuery;
 }

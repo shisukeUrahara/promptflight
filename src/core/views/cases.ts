@@ -57,7 +57,9 @@ export function buildCaseRows(results: readonly CaseResult[], cases: readonly Ca
 const scored = (row: CaseRow) => Object.values(row.variants).filter((v) => !v.unscored);
 
 export function filterRows(rows: readonly CaseRow[], q: CasesQuery): CaseRow[] {
+  const needle = q.q?.toLowerCase();
   return rows.filter((row) => {
+    if (needle && !row.case_id.toLowerCase().includes(needle) && !row.text.toLowerCase().includes(needle)) return false;
     if (q.split && row.split !== q.split) return false;
     if (q.slice && row.slice !== q.slice) return false;
     if (q.gold && row.gold.category !== q.gold) return false;
