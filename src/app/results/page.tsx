@@ -9,8 +9,10 @@ import { ContrastGrid, MetricSwitch } from "@/components/report/ContrastGrid";
 import { KpiCards } from "@/components/report/KpiCards";
 import { ManifestStrip } from "@/components/report/ManifestStrip";
 import { RunPicker } from "@/components/report/RunPicker";
+import { SliceChart } from "@/components/report/SliceChart";
 import { RunChips } from "@/components/overview/RunChips";
-import { getRun, getRuns, pickRun } from "../data";
+import { accuracyBySlice } from "@/core/metrics/slices";
+import { getCases, getRun, getRuns, pickRun } from "../data";
 
 export const metadata: Metadata = { title: "Results" };
 
@@ -55,7 +57,8 @@ export default async function Page(props: PageProps<"/results">) {
 }
 
 function Report({ id, metric, variant }: { id: string; metric: "category" | "priority"; variant?: string }) {
-  const { manifest, scores } = getRun(id);
+  const { manifest, scores, results } = getRun(id);
+  const bySlice = accuracyBySlice(results, getCases());
   const contrasts = scores.contrasts.filter((c) => (c.metric ?? "category") === metric);
   const shown = scores.variants.find((v) => v.variant === variant) ?? scores.variants[0];
   const anyShown = contrasts.some((c) => c.p_holm < 0.05);
@@ -77,6 +80,9 @@ function Report({ id, metric, variant }: { id: string; metric: "category" | "pri
           <MetricSwitch runId={id} metric={metric} />
         </div>
         <ContrastGrid contrasts={contrasts} runId={id} />
+      </Card>
+      <Card title="Accuracy by ticket type" hint="Category accuracy on each kind of ticket. Select a type to see its tickets.">
+        <SliceChart bySlice={bySlice} runId={id} />
       </Card>
       <div className="grid gap-6 xl:grid-cols-[3fr_2fr]">
         <Card title="Confusion matrix" hint="Rows are the gold category, columns the answer. Select a cell to see its tickets.">

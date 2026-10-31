@@ -8,6 +8,7 @@ import { ConfusionMatrix } from "./ConfusionMatrix";
 import { ContrastGrid } from "./ContrastGrid";
 import { KpiCards } from "./KpiCards";
 import { ManifestStrip } from "./ManifestStrip";
+import { SliceChart } from "./SliceChart";
 
 // The synthetic UI fixture; its numbers are made up, which is fine for a rendering test.
 const root = "e2e/fixtures/data/experiments";
@@ -102,5 +103,18 @@ describe("FailureTable", () => {
     render(<FailureTable variants={[v]} runId={holdout} />);
     expect(screen.getByRole("link", { name: "2" })).toHaveAttribute("href", `/cases?run=${holdout}&variant=${v.variant}&failure=invalid_json`);
     expect(screen.getAllByText("0").length).toBe(4);
+  });
+});
+
+describe("SliceChart", () => {
+  test("shows each prompt's accuracy per ticket type and links to the tickets", () => {
+    const cell = (n: number, correct: number) => ({ n, correct, accuracy: n ? correct / n : null });
+    const row = { clear: cell(4, 3), ambiguous_pair: cell(2, 1), injection: cell(0, 0), noisy: cell(5, 5) };
+    render(<SliceChart bySlice={{ "zero-json": row }} runId="r" />);
+    const clear = screen.getByTestId("slice-clear");
+    expect(clear).toHaveTextContent("4 tickets");
+    expect(within(clear).getByLabelText("zero-json: 75.0%")).toBeInTheDocument();
+    expect(within(screen.getByTestId("slice-injection")).getByLabelText("zero-json: no tickets")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Noisy" })).toHaveAttribute("href", expect.stringContaining("slice=noisy"));
   });
 });
