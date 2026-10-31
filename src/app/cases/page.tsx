@@ -17,7 +17,7 @@ import { buildCaseRows, filterRows } from "@/core/views/cases";
 import { casesHref, parseCasesQuery, type CasesQuery } from "@/core/views/query";
 import { dataDir, getCases, getRun, getRuns, pickRun } from "../data";
 
-export const metadata: Metadata = { title: "Cases" };
+export const metadata: Metadata = { title: "Tickets" };
 const PAGE_SIZE = 15;
 
 export default async function Page(props: PageProps<"/cases">) {
@@ -32,7 +32,7 @@ export default async function Page(props: PageProps<"/cases">) {
     <div className="space-y-6">
       <header className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
         <div>
-          <h1 className="text-2xl font-semibold md:text-3xl">Cases</h1>
+          <h1 className="text-2xl font-semibold md:text-3xl">Tickets</h1>
           <p className="mt-1 text-muted">Every ticket, every variant, with the raw model output.</p>
         </div>
         {current && (

@@ -12,7 +12,7 @@ export function ThemeToggle() {
       onClick={() => setTheme(next)}
       aria-label="Toggle dark mode"
       title="Toggle dark mode"
-      className="grid size-9 place-items-center rounded-lg border border-line text-muted transition-colors hover:bg-surface-2 hover:text-ink"
+      className="grid size-10 place-items-center rounded-full border border-line bg-surface/70 text-muted transition-colors hover:text-ink"
     >
       <Sun className="size-4 dark:hidden" aria-hidden />
       <Moon className="hidden size-4 dark:block" aria-hidden />

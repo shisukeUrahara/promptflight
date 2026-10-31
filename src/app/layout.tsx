@@ -33,7 +33,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
             Skip to content
           </a>
           <Nav />
-          <main id="main" className="mx-auto w-full max-w-7xl flex-1 px-4 py-6 md:py-10">
+          <main id="main" className="mx-auto w-full max-w-7xl flex-1 px-4 pb-28 pt-6 md:pb-12 md:pt-10">
             {children}
           </main>
           <footer className="border-t border-line py-6 text-center text-xs text-muted">

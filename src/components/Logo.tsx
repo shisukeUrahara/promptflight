@@ -1,8 +1,9 @@
+import { Send } from "lucide-react";
+
 export function Logo() {
   return (
-    <svg viewBox="0 0 32 32" className="size-7" aria-hidden>
-      <path d="M4 22 L28 10 L20 28 L16 19 Z" className="fill-primary" />
-      <circle cx="26" cy="6" r="2" className="fill-v-few-json" />
-    </svg>
+    <span aria-hidden className="grid size-8 place-items-center rounded-xl bg-primary text-primary-ink shadow-[0_0_24px_var(--glow-violet)]">
+      <Send className="size-4 -rotate-12" />
+    </span>
   );
 }

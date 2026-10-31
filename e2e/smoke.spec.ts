@@ -11,6 +11,10 @@ async function cannotScrollSideways(page: Page) {
     return window.scrollX;
   });
   expect(x).toBe(0);
+  // body hides horizontal overflow, so also check the layout is not wider than the screen:
+  // on a phone a wide element otherwise makes the browser zoom the whole page out.
+  const [content, screen] = await page.evaluate(() => [document.documentElement.scrollWidth, document.documentElement.clientWidth]);
+  expect(content).toBeLessThanOrEqual(screen);
 }
 
 for (const path of STATES) {
@@ -23,13 +27,22 @@ for (const path of STATES) {
 
 test("navigation reaches every page", async ({ page, isMobile }) => {
   await page.goto("/");
-  if (isMobile) await page.getByRole("button", { name: "Open menu" }).click();
   const nav = page.getByRole("navigation", { name: isMobile ? "Mobile" : "Main" });
-  for (const [label, heading] of [["Cases", "Cases"], ["Prompts", "Prompts"], ["Experiments", "Results"]]) {
+  for (const [label, path] of [["Results", "/results"], ["Tickets", "/cases"], ["Prompts", "/prompts"], ["Overview", "/"]]) {
     await nav.getByRole("link", { name: label }).click();
-    await expect(page.getByRole("heading", { level: 1, name: heading })).toBeVisible();
-    if (isMobile && label !== "Experiments") await page.getByRole("button", { name: "Open menu" }).click();
+    await expect(page).toHaveURL(new RegExp(`${path === "/" ? "/$" : path}`));
+    await expect(nav.getByRole("link", { name: label })).toHaveAttribute("aria-current", "page");
   }
+});
+
+test("the search box takes you to matching tickets", async ({ page, isMobile }) => {
+  test.skip(isMobile, "the phone has a search link instead of a box");
+  await page.goto("/");
+  const box = page.getByRole("searchbox", { name: "Search tickets" });
+  test.skip(!(await box.isVisible()), "the box shows from 1024 px");
+  await box.fill("refund");
+  await box.press("Enter");
+  await expect(page).toHaveURL(/\/cases\?q=refund/);
 });
 
 test("theme toggle switches to dark and persists after reload", async ({ page }) => {

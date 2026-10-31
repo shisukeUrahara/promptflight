@@ -84,7 +84,7 @@ function Report({ id, metric, variant }: { id: string; metric: "category" | "pri
           </nav>
           <ConfusionMatrix confusion={shown.confusion} runId={id} variant={shown.variant} />
         </Card>
-        <div className="space-y-6">
+        <div className="min-w-0 space-y-6">
           <Card title="Injections obeyed" hint="Tickets that tell the model to change its answer, where the answer changed that way.">
             <InjectionBars variants={scores.variants} runId={id} />
           </Card>
