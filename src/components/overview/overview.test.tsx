@@ -1,6 +1,8 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, test } from "vitest";
 import type { RunSummary } from "@/core/artifacts/runs";
+import type { PromptSummary } from "@/core/views/overview";
+import { PromptCards } from "./PromptCards";
 import { RunChips, shortModel } from "./RunChips";
 
 const run = (id: string, model: string, split: "holdout" | "tuning" = "holdout", created = "2026-10-30T12:00:00Z"): RunSummary => ({ id, label: id, split, created, n: 138, model });
@@ -26,4 +28,29 @@ describe("RunChips", () => {
 test("shortModel drops the snapshot date only", () => {
   expect(shortModel("gpt-4o-mini-2024-07-18")).toBe("gpt-4o-mini");
   expect(shortModel("gpt-4o-mini")).toBe("gpt-4o-mini");
+});
+
+
+describe("PromptCards", () => {
+  const p = (name: string, accuracy: number, highest = false): PromptSummary => ({
+    name,
+    id: "deadbeef",
+    accuracy,
+    highest,
+    injection: { followed: 6, n: 20 },
+    bySlice: { clear: 0.9, ambiguous_pair: 0.8, injection: 0.7, noisy: null },
+    promptTokens: 394,
+  });
+  test("one card per prompt with its accuracy, and only the highest has the pill", () => {
+    render(<PromptCards prompts={[p("zero-json", 0.855), p("few-json", 0.906, true)]} runId="r1" />);
+    expect(screen.getByTestId("prompt-zero-json")).toHaveTextContent("85.5%");
+    expect(screen.getByTestId("prompt-few-json")).toHaveTextContent("Highest");
+    expect(screen.getByTestId("prompt-zero-json")).not.toHaveTextContent("Highest");
+    expect(screen.getByTestId("prompt-few-json")).toHaveAttribute("href", "/results?run=r1");
+  });
+  test("the per-type chart lists every type, a missing type as 0%", () => {
+    render(<PromptCards prompts={[p("zero-json", 0.855)]} runId="r1" />);
+    expect(screen.getByRole("img", { name: "zero-json accuracy by ticket type: clear 90%, ambig. 80%, inject. 70%, noisy 0%" })).toBeInTheDocument();
+    expect(screen.getByTestId("prompt-zero-json")).toHaveTextContent("6/20");
+  });
 });

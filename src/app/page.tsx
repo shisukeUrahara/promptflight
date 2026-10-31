@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { connection } from "next/server";
 import { Hero } from "@/components/overview/Hero";
+import { PromptCards } from "@/components/overview/PromptCards";
 import { RunChips } from "@/components/overview/RunChips";
 import { Empty } from "@/components/StateViews";
 import { overviewStats } from "@/core/views/overview";
@@ -27,6 +28,7 @@ export default async function Page(props: PageProps<"/">) {
   return (
     <div className="space-y-16">
       <Hero prompts={o.prompts.length} tickets={o.nCases} chips={<RunChips runs={runs} current={current.id} basePath="/" />} />
+      <PromptCards prompts={o.prompts} runId={current.id} />
     </div>
   );
 }
