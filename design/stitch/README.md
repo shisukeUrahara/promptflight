@@ -72,3 +72,10 @@ Concepts: A `ed84e34ab401465fa9caa32d59db82e7`, B `a2131aabec0c4f259e955193a6f9f
 **Copy rule.** Every prompt to Stitch carried the exact text and numbers, and forbade avatars, dates and claims. Where Stitch still invented something (a footnote, a "live" tag, red/green split bars, made-up card numbers on the first light Results), the build uses only the run files: split bars use each prompt's own color, and the per-type charts are bars of real accuracy on clear / ambiguous / injection / noisy tickets.
 
 The model `GEMINI_3_5_FLASH_LITE` was used; the default model timed out.
+
+## Built (31 Oct 2026)
+The v2 screens are built; the README images in `docs/img/` are captured from the real holdout run by `e2e/screenshots.spec.ts`. Where the build differs from Stitch:
+- The per-prompt area curves became four small bars with their values: four points do not make a trend.
+- A comparison card shows the difference, McNemar p and Holm p, the split of tickets only one prompt got right, and a link to those tickets.
+- Pages keep the top pill tabs on tablets; below 768 px the tabs move to a bottom bar.
+- Under reduced motion the fade-in is off entirely.

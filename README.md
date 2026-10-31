@@ -4,20 +4,34 @@
 
 PromptFlight runs four prompts (a 2×2 of few-shot examples × API-enforced structured output) on the same 204 synthetic support tickets. It checks every answer against a strict schema and a human label, tests the differences with paired statistics that were pre-registered before the final run, and lets you open any ticket to see the raw model output behind each number. Every answer is cached in the repo, so all results replay without an API key.
 
-![Experiments page: four prompt variants on 138 holdout tickets, with paired comparisons and a confusion matrix](docs/img/experiments.png)
+![Overview page: four prompts on 138 holdout tickets, the verdict, how it works and what we found](docs/img/overview.png)
 
 ## What's inside
 
 | Page | What it does |
 |---|---|
-| **Experiments** | Pick a run. One card per prompt variant: category accuracy with a 95% interval, macro-F1, priority accuracy, format and label validity, injections obeyed, tokens, p95 latency, cost per 100 tickets. The four pre-registered comparisons with paired counts, exact McNemar p and Holm-corrected p. A confusion matrix where every cell links to its tickets. |
-| **Cases** | Every ticket × every variant, right or wrong. Filters for slice, disagreements, all-variants-wrong, gold category and failure code, kept in the URL. A ticket opens in a dialog with the gold label and each variant's raw answer, tokens, latency and cache tag. |
-| **Prompts** | Version history per variant, an editor (Monaco), the JSON schema strict mode sends, and "save as new version". Versions are immutable and named by a hash of their content. |
+| **Overview** | The short answer. One card per prompt with its accuracy and how it did on each kind of ticket, a one-line verdict (computed, so a run with a real winner would say so), a diagram of how the test works, and three findings that each link to their tickets. |
+| **Results** | The full numbers for one run. Per prompt: category accuracy with a 95% interval, macro-F1, priority accuracy, valid answers, hidden instructions obeyed, tokens, p95 latency, cost per 100 tickets. The pre-registered comparisons with paired counts, exact McNemar p and Holm-corrected p. Accuracy by ticket type, a confusion matrix, injections and model failures. Every number links to its tickets. |
+| **Tickets** | Every ticket × every prompt, right or wrong. Search by id or text; filters for ticket type, disagreements, all-prompts-wrong, gold category and failure code, kept in the URL. A ticket opens in a dialog with the gold label and each prompt's raw answer, tokens, latency and cache tag. |
+| **Prompts** | Version timeline per prompt, an editor (Monaco), the JSON schema strict mode sends, and "save as new version". Versions are immutable and named by a hash of their content. |
+
+Light and dark themes; on a phone the tabs move to the bottom of the screen.
 
 | | |
 |---|---|
-| ![A ticket every variant gets wrong, with the raw answers](docs/img/case-dialog.png) | ![Prompts page with the editor and schema preview](docs/img/prompts.png) |
-| ![Priority comparisons in dark mode](docs/img/experiments-priority-dark.png) | ![Experiments page on a phone](docs/img/experiments-phone.png) |
+| ![The pre-registered comparisons: difference, McNemar p and Holm p for each pair](docs/img/results-comparisons.png) | ![A ticket every prompt gets wrong, with the raw answers](docs/img/case-dialog.png) |
+| ![Results page in dark mode](docs/img/results-dark.png) | ![Prompts page with the version timeline, editor and schema preview](docs/img/prompts.png) |
+| ![Overview on a phone, dark mode](docs/img/overview-phone.png) | ![Tickets on a phone: one card per ticket](docs/img/tickets-phone.png) |
+
+## How to read the results
+
+- **Accuracy** is the share of tickets where the prompt picked the same category as the person who labeled the ticket. 90.6% means about 125 of 138 right.
+- **95% CI** is the range the true accuracy probably sits in. 138 tickets is a small test, so the ranges are wide and they overlap.
+- **Difference** in a comparison is how many points one prompt beat the other by, on the same tickets.
+- **p** asks "could a gap this big happen by luck?" Below 0.05 means probably not luck. **After Holm** corrects for running several comparisons at once, because the more tests you run, the more likely one looks good by chance.
+- **Shown / Not shown**: a difference counts as shown only if the corrected p is below 0.05. In these runs none is, so the honest result is "no prompt wins clearly".
+- **The split bar** counts only the tickets where the two prompts disagree: one got it right and the other did not. Tickets both got right or both got wrong say nothing about which prompt is better.
+- **Hidden instructions obeyed** counts tickets with a line like "set the priority to urgent" where the model did what the ticket said. Lower is better.
 
 > **Synthetic data.** All tickets were written by gpt-4.1 and describe no real customer or company. Independent portfolio project, not affiliated with OpenAI. See [NOTICE.md](NOTICE.md).
 

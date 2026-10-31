@@ -137,6 +137,10 @@
       transition-duration: 0.01ms !important;
       scroll-behavior: auto !important;
     }
+    /* Staggered cards would otherwise still wait out their delay before showing. */
+    .fade-up {
+      animation: none !important;
+    }
   }
 }
 

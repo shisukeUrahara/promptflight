@@ -34,9 +34,11 @@ Read in this order. Everything under `src/core/` is plain TypeScript with no Nex
 
 ## 6. The web app
 - `src/app/data.ts`: server-side reads of the data folder.
-- `src/app/page.tsx` (Experiments), `src/app/cases/page.tsx`, `src/app/prompts/page.tsx`: server components.
+- `src/app/page.tsx` (Overview), `src/app/results/page.tsx`, `src/app/cases/page.tsx` (Tickets), `src/app/prompts/page.tsx`: server components.
+- `src/core/views/overview.ts` and `src/core/metrics/slices.ts`: the numbers behind the Overview, including the verdict line.
+- `src/components/ui/charts.tsx`: the hand-made SVG and CSS charts (no chart library). `src/app/globals.css` holds the light and dark tokens; `src/app/tokens.test.ts` checks every text colour pair is at least 4.5:1.
 - `src/app/prompts/actions.ts`: the only write path, a server action that checks read-only mode and validates input itself.
-- `src/core/views/query.ts`, `src/core/views/cases.ts`: the Cases filters, kept in the URL.
+- `src/core/views/query.ts`, `src/core/views/cases.ts`: the Tickets filters and search, kept in the URL.
 
 ## 7. Tests
 - Unit and component tests sit next to the code (`*.test.ts` in node, `*.test.tsx` in jsdom; `vitest.config.ts`).
