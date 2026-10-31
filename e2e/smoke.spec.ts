@@ -3,7 +3,7 @@ import { expect, test, type Page } from "@playwright/test";
 
 const PAGES = ["/", "/results", "/cases", "/prompts"];
 // Every state a visitor can reach, checked at every width and in both themes.
-const STATES = [...PAGES, "/results?metric=priority", "/cases?disagree=1", "/cases?slice=injection", "/prompts?name=few-strict"];
+const STATES = [...PAGES, "/results?metric=priority", "/cases?disagree=1", "/cases?slice=injection", "/prompts?name=few-strict", "/cases?q=no-such-ticket", "/no-such-page"];
 
 async function cannotScrollSideways(page: Page) {
   const x = await page.evaluate(() => {
@@ -24,6 +24,14 @@ for (const path of STATES) {
     await cannotScrollSideways(page);
   });
 }
+
+test("an unknown address gets a 404 page that links back", async ({ page }) => {
+  const res = await page.goto("/no-such-page");
+  expect(res?.status()).toBe(404);
+  await expect(page.getByRole("heading", { name: "Page not found" })).toBeVisible();
+  await page.getByRole("navigation", { name: "Pages" }).getByRole("link", { name: "Results" }).click();
+  await expect(page).toHaveURL(/\/results$/);
+});
 
 test("navigation reaches every page", async ({ page, isMobile }) => {
   await page.goto("/");
