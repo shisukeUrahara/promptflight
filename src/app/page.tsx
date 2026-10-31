@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { connection } from "next/server";
+import { Findings } from "@/components/overview/Findings";
 import { FlowDiagram } from "@/components/overview/FlowDiagram";
 import { Hero } from "@/components/overview/Hero";
 import { PromptCards } from "@/components/overview/PromptCards";
@@ -28,6 +29,7 @@ export default async function Page(props: PageProps<"/">) {
   const run = getRun(current.id);
   const cases = getCases();
   const o = overviewStats(run.scores, run.results, cases);
+  const detectable = minDetectableEffect({ n: o.nCases, ...DEFAULT_SETUP }).mde;
 
   return (
     <div className="space-y-16">
@@ -36,11 +38,12 @@ export default async function Page(props: PageProps<"/">) {
       <VerdictStrip
         verdict={o.verdict}
         comparisons={run.scores.contrasts.filter((c) => (c.metric ?? "category") === "category").length}
-        detectable={minDetectableEffect({ n: o.nCases, ...DEFAULT_SETUP }).mde}
+        detectable={detectable}
         preregistered={run.manifest.preregistration_sha !== null}
         runId={current.id}
       />
       <FlowDiagram tickets={cases.length} prompts={o.prompts.map((p) => p.name)} model={shortModel(run.manifest.model)} />
+      <Findings o={o} runId={current.id} detectable={detectable} />
     </div>
   );
 }
