@@ -33,7 +33,7 @@ const pts = (v: number) => `${v >= 0 ? "+" : "−"}${Math.abs(v * 100).toFixed(1
 export function ContrastGrid({ contrasts, runId }: { contrasts: ContrastReport[]; runId: string }) {
   if (contrasts.length === 0) return <p className="text-sm text-muted">This run does not have both variants of any comparison.</p>;
   return (
-    <ul aria-label="Comparisons" className="grid gap-4 md:grid-cols-2">
+    <ul aria-label="Comparisons" className="grid gap-4 lg:grid-cols-2">
       {contrasts.map((c, i) => {
         const shown = c.p_holm < SIGNIFICANT;
         const d = c.accuracy_diff.point;
@@ -57,7 +57,7 @@ export function ContrastGrid({ contrasts, runId }: { contrasts: ContrastReport[]
             <dl className="mt-5 grid grid-cols-3 gap-3 border-y border-line py-4">
               <div>
                 <dt className="micro">Difference</dt>
-                <dd className={`num mt-1 font-mono text-lg ${d > 0 ? "text-success" : d < 0 ? "text-danger" : ""}`}>{pts(d)}</dd>
+                <dd className={`num mt-1 whitespace-nowrap font-mono text-lg ${d > 0 ? "text-success" : d < 0 ? "text-danger" : ""}`}>{pts(d)}</dd>
               </div>
               <div>
                 <dt className="micro">p (McNemar)</dt>

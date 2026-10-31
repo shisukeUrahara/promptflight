@@ -33,6 +33,20 @@ test("an unknown address gets a 404 page that links back", async ({ page }) => {
   await expect(page).toHaveURL(/\/results$/);
 });
 
+test("keyboard focus shows a ring that keeps the pill shape", async ({ page }) => {
+  await page.goto("/results");
+  const chip = page.getByRole("navigation", { name: "Model" }).getByRole("link").first();
+  await chip.focus();
+  await page.keyboard.press("Shift+Tab");
+  await page.keyboard.press("Tab");
+  const style = await chip.evaluate((el) => {
+    const s = getComputedStyle(el);
+    return { outline: s.outlineStyle, radius: parseFloat(s.borderTopLeftRadius) };
+  });
+  expect(style.outline).toBe("solid");
+  expect(style.radius).toBeGreaterThan(100);
+});
+
 test("navigation reaches every page", async ({ page, isMobile }) => {
   await page.goto("/");
   const nav = page.getByRole("navigation", { name: isMobile ? "Mobile" : "Main" });
