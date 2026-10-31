@@ -33,12 +33,14 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
             Skip to content
           </a>
           <Nav />
-          <main id="main" className="mx-auto w-full max-w-7xl flex-1 px-4 pb-28 pt-6 md:pb-12 md:pt-10">
+          <main id="main" className="mx-auto w-full max-w-7xl flex-1 px-4 pb-10 pt-6 md:pb-12 md:pt-10">
             {children}
           </main>
-          <footer className="border-t border-line py-6 text-center text-xs text-muted">
-            PromptFlight · independent portfolio project · all tickets are synthetic ·{" "}
-            <a className="underline underline-offset-2" href="https://github.com/shisukeUrahara/promptflight">source</a>
+          <footer className="mx-auto mb-20 flex w-full max-w-7xl flex-wrap items-center justify-between gap-2 border-t border-line/60 px-4 py-6 text-xs text-muted md:mb-0">
+            <span>PromptFlight · an independent portfolio project · every ticket is synthetic</span>
+            <a className="underline underline-offset-2 hover:text-ink" href="https://github.com/shisukeUrahara/promptflight">
+              Source on GitHub
+            </a>
           </footer>
         </ThemeProvider>
       </body>

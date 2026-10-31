@@ -109,6 +109,11 @@
   body {
     font-family: var(--font-sans);
     overflow-x: hidden;
+    /* The aurora: a violet glow at the top centre and a blue one at the lower right, fixed while the page scrolls. */
+    background-image:
+      radial-gradient(60% 45% at 50% -8%, var(--glow-violet), transparent 70%),
+      radial-gradient(45% 40% at 100% 100%, var(--glow-blue), transparent 70%);
+    background-attachment: fixed;
   }
 
   h1,
