@@ -21,13 +21,13 @@ describe("KpiCards", () => {
     const cards = within(screen.getByRole("list", { name: "Variants" })).getAllByRole("listitem");
     expect(cards).toHaveLength(scores.variants.length);
     for (const v of scores.variants) {
-      expect(screen.getByTestId(`acc-${v.variant}`)).toHaveTextContent(v.accuracy.toFixed(3));
+      expect(screen.getByTestId(`acc-${v.variant}`)).toHaveTextContent(`${(v.accuracy * 100).toFixed(1)}%`);
     }
   });
 
   test("each card links to its tickets", () => {
     render(<KpiCards variants={scores.variants} runId={holdout} />);
-    const links = screen.getAllByRole("link", { name: "See its tickets" });
+    const links = screen.getAllByRole("link", { name: "See its tickets ›" });
     expect(links[0]).toHaveAttribute("href", `/cases?run=${holdout}&variant=${scores.variants[0].variant}`);
   });
 
