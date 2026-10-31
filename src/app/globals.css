@@ -157,3 +157,20 @@
   text-transform: uppercase;
   color: var(--muted);
 }
+
+/* Cards rise in gently. --delay staggers them. The reduced-motion rule in the base layer turns this off. */
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@utility fade-up {
+  animation: fade-up 0.5s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  animation-delay: var(--delay, 0ms);
+}
