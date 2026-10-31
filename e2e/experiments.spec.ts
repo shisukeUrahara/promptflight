@@ -9,7 +9,7 @@ const scores = (id: string) => JSON.parse(readFileSync(`${root}/${id}/scores.jso
 
 test("shows the newest holdout run by default, one card per variant", async ({ page }) => {
   await page.goto("/results");
-  await expect(page.getByLabel("Run", { exact: true })).toHaveValue(holdout);
+  await expect(page.getByLabel("All runs")).toHaveValue(holdout);
   for (const v of scores(holdout).variants) {
     await expect(page.getByTestId(`acc-${v.variant}`)).toHaveText(v.accuracy.toFixed(3));
   }
@@ -17,7 +17,7 @@ test("shows the newest holdout run by default, one card per variant", async ({ p
 
 test("picking another run reloads with its numbers", async ({ page }) => {
   await page.goto("/results");
-  await page.getByLabel("Run", { exact: true }).selectOption(tuning);
+  await page.getByLabel("All runs").selectOption(tuning);
   await expect(page).toHaveURL(new RegExp(`run=${tuning}`));
   const v = scores(tuning).variants[0];
   await expect(page.getByTestId(`acc-${v.variant}`)).toHaveText(v.accuracy.toFixed(3));
@@ -25,7 +25,7 @@ test("picking another run reloads with its numbers", async ({ page }) => {
 
 test("an unknown run id falls back to the default run", async ({ page }) => {
   await page.goto("/results?run=does-not-exist");
-  await expect(page.getByLabel("Run", { exact: true })).toHaveValue(holdout);
+  await expect(page.getByLabel("All runs")).toHaveValue(holdout);
 });
 
 test("the metric switch shows the priority family", async ({ page }) => {
