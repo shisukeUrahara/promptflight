@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import { describe, expect, test } from "vitest";
 import type { Case } from "@/core/domain/case";
 import type { CaseResult } from "@/core/runner/types";
@@ -38,10 +38,11 @@ const results = [
 describe("CaseTable", () => {
   test("a check for a right answer, the code for a failure, 'not scored' for a missing call", () => {
     render(<CaseTable rows={buildCaseRows(results, [c])} variants={["zero-json", "few-json", "few-strict"]} rowHref={(id) => `/cases?case=${id}`} />);
-    expect(screen.getByTestId("cell-t-001-zero-json")).toContainElement(screen.getByLabelText("right"));
+    expect(within(screen.getByTestId("cell-t-001-zero-json")).getByLabelText("right")).toBeInTheDocument();
     expect(screen.getByTestId("cell-t-001-few-json")).toHaveTextContent("invalid_json");
     expect(screen.getByTestId("cell-t-001-few-strict")).toHaveTextContent("not scored");
-    expect(screen.getByRole("link", { name: "t-001" })).toHaveAttribute("href", "/cases?case=t-001");
+    // One link in the table, one in the phone card.
+    for (const a of screen.getAllByRole("link", { name: "t-001" })) expect(a).toHaveAttribute("href", "/cases?case=t-001");
   });
 });
 

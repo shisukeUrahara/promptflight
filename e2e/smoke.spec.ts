@@ -70,7 +70,7 @@ for (const scheme of ["light", "dark"] as const) {
 
 test("an open ticket dialog passes axe and keeps the page from scrolling sideways", async ({ page }) => {
   await page.goto("/cases");
-  await page.getByRole("row").nth(1).getByRole("link").first().click();
+  await page.getByRole("link", { name: /^t-\d+$/ }).first().click();
   await expect(page.getByRole("dialog")).toBeVisible();
   const { violations } = await new AxeBuilder({ page }).include("dialog").analyze();
   expect(violations.filter((v) => v.impact === "serious" || v.impact === "critical").map((v) => v.id)).toEqual([]);

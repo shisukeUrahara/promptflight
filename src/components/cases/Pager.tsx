@@ -6,7 +6,7 @@ export function Pager({ total, pageSize, page, href, noun = "items" }: { total: 
   const pages = Math.max(1, Math.ceil(total / pageSize));
   const from = total === 0 ? 0 : (page - 1) * pageSize + 1;
   const to = Math.min(page * pageSize, total);
-  const btn = "grid size-9 place-items-center rounded-lg border border-line";
+  const btn = "grid size-9 place-items-center rounded-full border border-line bg-surface/70 hover:bg-surface-2";
   return (
     <nav aria-label="Pagination" className="flex flex-wrap items-center justify-between gap-3 text-sm">
       <p className="font-mono text-xs text-muted" aria-live="polite">

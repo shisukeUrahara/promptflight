@@ -18,7 +18,7 @@ test("search by ticket id finds that one ticket", async ({ page }) => {
   const id = results[0].case_id;
   await page.goto(`/cases?q=${id.toUpperCase()}`);
   await expect(page.getByText(/Showing 1–1 of 1 ticket/)).toBeVisible();
-  await expect(page.getByText(id, { exact: true }).first()).toBeVisible();
+  await expect(page.getByRole("link", { name: id, exact: true })).toBeVisible();
 });
 
 test("the disagreement chip filters through the URL", async ({ page }) => {
@@ -39,7 +39,7 @@ test("a failure-code link shows only tickets with that code", async ({ page }) =
 
 test("a ticket opens in a dialog with the raw answers; Esc closes it and focus returns", async ({ page }) => {
   await page.goto("/cases");
-  const first = page.getByRole("row").nth(1).getByRole("link").first();
+  const first = page.getByRole("link", { name: /^t-\d+$/ }).first();
   const id = (await first.textContent())!.trim();
   await first.click();
   const dialog = page.getByRole("dialog", { name: id });

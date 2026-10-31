@@ -7,7 +7,7 @@ import { useEffect, useRef, type ReactNode } from "react";
  * A native modal <dialog>: showModal() makes the rest of the page inert, so focus stays inside,
  * and Esc closes it. Closing goes back to the list URL and returns focus to the ticket's link.
  */
-export function CaseDrawer({ title, closeHref, returnFocusId, children }: { title: string; closeHref: string; returnFocusId: string; children: ReactNode }) {
+export function CaseDrawer({ title, closeHref, ticketId, children }: { title: string; closeHref: string; ticketId: string; children: ReactNode }) {
   const ref = useRef<HTMLDialogElement>(null);
   const router = useRouter();
 
@@ -18,9 +18,10 @@ export function CaseDrawer({ title, closeHref, returnFocusId, children }: { titl
     return () => {
       document.body.style.overflow = "";
       // Runs when the list re-renders without the dialog, so the ticket link exists again.
-      setTimeout(() => document.getElementById(returnFocusId)?.focus(), 0);
+      // The table and the phone cards both link the ticket; focus the one on screen.
+      setTimeout(() => [...document.querySelectorAll<HTMLElement>(`[data-ticket="${ticketId}"]`)].find((e) => e.offsetParent !== null)?.focus(), 0);
     };
-  }, [returnFocusId]);
+  }, [ticketId]);
 
   const close = () => router.replace(closeHref, { scroll: false });
 

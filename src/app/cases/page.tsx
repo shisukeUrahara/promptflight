@@ -4,11 +4,13 @@ import { connection } from "next/server";
 import { readFileSync, existsSync } from "node:fs";
 import path from "node:path";
 import { AutoSubmitSelect } from "@/components/AutoSubmitSelect";
+import { Search } from "lucide-react";
 import { Card } from "@/components/Card";
 import { CaseDetail } from "@/components/cases/CaseDetail";
 import { CaseDrawer } from "@/components/cases/CaseDrawer";
 import { CaseTable } from "@/components/cases/CaseTable";
 import { Pager } from "@/components/cases/Pager";
+import { RunChips } from "@/components/overview/RunChips";
 import { RunPicker } from "@/components/report/RunPicker";
 import { Empty } from "@/components/StateViews";
 import { CATEGORIES, SLICES } from "@/core/domain/labels";
@@ -29,14 +31,17 @@ export default async function Page(props: PageProps<"/cases">) {
   const cases = getCases();
 
   return (
-    <div className="space-y-6">
-      <header className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-        <div>
-          <h1 className="text-2xl font-semibold md:text-3xl">Tickets</h1>
-          <p className="mt-1 text-muted">Every ticket, every variant, with the raw model output.</p>
+    <div className="space-y-8">
+      <header className="fade-up flex flex-col gap-5">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+          <div>
+            <h1 className="display text-5xl md:text-6xl">Tickets</h1>
+            <p className="mt-3 text-muted">Every ticket, every prompt, with the raw model output.</p>
+          </div>
+          {current && <RunChips runs={runs} current={current.id} basePath="/cases" />}
         </div>
         {current && (
-          <div className="min-w-0 lg:max-w-xl">
+          <div className="min-w-0 sm:max-w-xl">
             <RunPicker runs={runs} current={current.id} action="/cases" />
           </div>
         )}
@@ -51,8 +56,8 @@ function DatasetPanel({ count }: { count: number }) {
   const file = path.join(dataDir(), "fixtures", "tickets", "agreement.json");
   const a = existsSync(file) ? JSON.parse(readFileSync(file, "utf8")) : null;
   return (
-    <details className="rounded-lg border border-line bg-surface p-4 shadow-card">
-      <summary className="cursor-pointer font-medium">About this dataset</summary>
+    <details className="rounded-3xl border border-line bg-surface/85 p-5 shadow-card backdrop-blur-xl">
+      <summary className="cursor-pointer text-sm font-medium">About this dataset</summary>
       <div className="mt-3 space-y-2 text-sm text-muted">
         <p>
           {count} synthetic support tickets, written by gpt-4.1 from a grid of intended labels, then labeled by one person who could not see the intended label.
@@ -94,17 +99,32 @@ function Results({ q, page, openId }: { q: CasesQuery; page: number; openId?: st
       key={label}
       href={casesHref(next)}
       aria-current={active ? "true" : undefined}
-      className="rounded-full border border-line px-3 py-1 text-xs aria-[current=true]:border-ink aria-[current=true]:bg-surface-2 aria-[current=true]:font-medium"
+      className="inline-flex items-center gap-1.5 rounded-full border border-line bg-surface/70 px-3 py-1.5 text-xs text-muted transition-colors hover:text-ink aria-[current=true]:border-brand/40 aria-[current=true]:bg-brand-bg aria-[current=true]:font-medium aria-[current=true]:text-ink"
     >
       {label}
-      {count !== undefined && <span className="ml-1 font-mono text-muted">{count}</span>}
+      {count !== undefined && <span className="num font-mono opacity-80">{count}</span>}
     </Link>
   );
   const sliceCount = (s: string) => all.filter((r) => r.slice === s).length;
 
   return (
     <Card>
-      <div className="mb-4 space-y-3">
+      <div className="mb-5 space-y-3">
+        <form method="get" action="/cases" role="search" aria-label="Find tickets" className="flex gap-2">
+          {Object.entries(q).map(([k, v]) => (k === "q" || v === undefined ? null : <input key={k} type="hidden" name={k} value={v === true ? "1" : String(v)} />))}
+          <label className="relative min-w-0 flex-1">
+            <span className="sr-only">Find a ticket</span>
+            <Search aria-hidden className="pointer-events-none absolute left-4 top-1/2 size-4 -translate-y-1/2 text-muted" />
+            <input
+              type="search"
+              name="q"
+              defaultValue={q.q ?? ""}
+              placeholder="Ticket id or words in the ticket"
+              className="w-full rounded-full border border-line bg-surface-2/60 py-2.5 pl-11 pr-4 text-sm placeholder:text-muted"
+            />
+          </label>
+          <button className="rounded-full bg-primary px-5 text-sm font-medium text-primary-ink">Search</button>
+        </form>
         <nav aria-label="Slice" className="flex flex-wrap gap-2">
           {chip("all", { ...q, slice: undefined }, !q.slice, all.length)}
           {SLICES.map((s) => chip(s.replace("_pair", ""), { ...q, slice: s }, q.slice === s, sliceCount(s)))}
@@ -112,6 +132,7 @@ function Results({ q, page, openId }: { q: CasesQuery; page: number; openId?: st
         <nav aria-label="Agreement" className="flex flex-wrap gap-2">
           {chip("Only disagreements", { ...q, disagree: !q.disagree || undefined }, !!q.disagree, filterRows(all, { disagree: true }).length)}
           {chip("All variants wrong", { ...q, allwrong: !q.allwrong || undefined }, !!q.allwrong, filterRows(all, { allwrong: true }).length)}
+          {q.q && chip(`“${q.q}” ×`, { ...q, q: undefined }, true)}
           {q.variant && chip(`${q.variant}${q.pred ? ` answered ${q.pred}` : ""} ×`, { ...q, variant: undefined, pred: undefined }, true)}
         </nav>
         <form method="get" action="/cases" className="flex flex-wrap gap-2">
@@ -119,7 +140,7 @@ function Results({ q, page, openId }: { q: CasesQuery; page: number; openId?: st
           <label className="sr-only" htmlFor="gold">
             Gold category
           </label>
-          <AutoSubmitSelect id="gold" name="gold" defaultValue={q.gold ?? ""} className="rounded-lg border border-line bg-surface px-3 py-1.5 text-sm">
+          <AutoSubmitSelect id="gold" name="gold" defaultValue={q.gold ?? ""} className="rounded-full border border-line bg-surface/70 px-3 py-1.5 text-sm">
             <option value="">Any gold category</option>
             {CATEGORIES.map((c) => (
               <option key={c}>{c}</option>
@@ -128,14 +149,14 @@ function Results({ q, page, openId }: { q: CasesQuery; page: number; openId?: st
           <label className="sr-only" htmlFor="failure">
             Failure code
           </label>
-          <AutoSubmitSelect id="failure" name="failure" defaultValue={q.failure ?? ""} className="rounded-lg border border-line bg-surface px-3 py-1.5 text-sm">
+          <AutoSubmitSelect id="failure" name="failure" defaultValue={q.failure ?? ""} className="rounded-full border border-line bg-surface/70 px-3 py-1.5 text-sm">
             <option value="">Any outcome</option>
             {OutcomeCode.options.map((c) => (
               <option key={c}>{c}</option>
             ))}
           </AutoSubmitSelect>
           <noscript>
-            <button className="rounded-lg border border-line px-3 py-1.5 text-sm">Filter</button>
+            <button className="rounded-full border border-line px-3 py-1.5 text-sm">Filter</button>
           </noscript>
         </form>
       </div>
@@ -148,7 +169,7 @@ function Results({ q, page, openId }: { q: CasesQuery; page: number; openId?: st
         <Pager total={rows.length} pageSize={PAGE_SIZE} page={p} href={(n) => withPage(`page=${n}`)(casesHref(q))} noun="tickets" />
       </div>
       {open && (
-        <CaseDrawer title={open.case_id} closeHref={withPage(`page=${p}`)(casesHref(q))} returnFocusId={`row-${open.case_id}`}>
+        <CaseDrawer title={open.case_id} closeHref={withPage(`page=${p}`)(casesHref(q))} ticketId={open.case_id}>
           <CaseDetail c={open} results={results.filter((r) => r.case_id === open.case_id)} />
         </CaseDrawer>
       )}
